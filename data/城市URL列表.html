@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>国内/国际接口 URL 列表（88个城市）</title>
+<style>
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; margin: 20px; background: #f5f6f8; color: #333; }
+    h1 { font-size: 20px; }
+    .summary { background: #fff; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; line-height: 1.8; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .summary b { color: #d4380d; }
+    table { border-collapse: collapse; width: 100%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.06); font-size: 13px; }
+    th, td { border: 1px solid #e8e8e8; padding: 8px 10px; text-align: left; vertical-align: middle; }
+    th { background: #fafafa; font-weight: 600; position: sticky; top: 0; }
+    tr:hover { background: #fafcff; }
+    .idx { color: #999; text-align: center; width: 40px; }
+    .name { font-weight: 600; white-space: nowrap; }
+    .dup { color: #d4380d; font-size: 11px; margin-left: 4px; }
+    .cat { color: #1890ff; white-space: nowrap; }
+    .reason { color: #666; white-space: nowrap; }
+    .lonlat { font-family: "SF Mono", Consolas, monospace; color: #d4380d; font-weight: 600; }
+    .url-cell { white-space: nowrap; }
+    .url-link { display: inline-block; padding: 3px 10px; border-radius: 4px; text-decoration: none; font-size: 12px; margin-right: 4px; }
+    .url-link.cn { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+    .url-link.intl { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+    .url-link:hover { opacity: 0.85; }
+    .copy-btn { padding: 3px 8px; font-size: 11px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; }
+    .copy-btn:hover { background: #f0f0f0; }
+    .copy-btn.copied { background: #52c41a; color: #fff; border-color: #52c41a; }
+    .tip { color: #999; font-size: 12px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<h1>国内 / 国际接口 URL 列表</h1>
+<div class="summary">
+    📊 共 <b>88</b> 个城市 (CSV 88行，含台北市重复行) &nbsp;|&nbsp;
+    分类: 省会: 30 | 海外热门: 23 | 重点城市: 17 | 极端天气: 12 | 直辖市: 4 | 特别行政区: 2<br>
+    🔐 加密: 国内 <b>MD5</b>(pwd+ts+lat+lon) &nbsp;|&nbsp; 国际 <b>HMAC-SHA256</b>(pwd, ts+lat+lon)<br>
+    ⚠️ 经纬度为 <b>CSV原始字符串</b>，红色标注，请逐个与 CSV 核对。
+</div>
+<table>
+<thead>
+<tr>
+    <th>序号</th><th>城市</th><th>分类</th><th>选取原因</th>
+    <th>经度(lon)</th><th>纬度(lat)</th>
+    <th>国内接口</th><th>国际接口</th>
+</tr>
+</thead>
+<tbody>
+
+        <tr>
+            <td class="idx">1</td>
+            <td class="name">北京市<span class="dup"></span></td>
+            <td class="cat">直辖市</td>
+            <td class="reason">全国核心城市</td>
+            <td class="lonlat" title="CSV原始值">116.407112</td>
+            <td class="lonlat" title="CSV原始值">39.904138</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=39.904138&lon=116.407112&key=be9f0e99ec1ddaafe8d673c8e9463eb1" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=39.904138&lon=116.407112&key=be9f0e99ec1ddaafe8d673c8e9463eb1">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=116.407112&lat=39.904138&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=a8d8520acfef7317a1197b6125c17129dc3426d4c6ea26f7dc8a33e7a439150f" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=116.407112&lat=39.904138&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=a8d8520acfef7317a1197b6125c17129dc3426d4c6ea26f7dc8a33e7a439150f">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">2</td>
+            <td class="name">天津市<span class="dup"></span></td>
+            <td class="cat">直辖市</td>
+            <td class="reason">全国核心城市</td>
+            <td class="lonlat" title="CSV原始值">117.1999887</td>
+            <td class="lonlat" title="CSV原始值">39.13000573</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=39.13000573&lon=117.1999887&key=5f76adf6ec50dac4f04edf78d6c718c3" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=39.13000573&lon=117.1999887&key=5f76adf6ec50dac4f04edf78d6c718c3">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=117.1999887&lat=39.13000573&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=f16180870b767e6acef41cb2968c6432a9a03fa821726fca8fde6286d79241f0" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=117.1999887&lat=39.13000573&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=f16180870b767e6acef41cb2968c6432a9a03fa821726fca8fde6286d79241f0">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">3</td>
+            <td class="name">上海市<span class="dup"></span></td>
+            <td class="cat">直辖市</td>
+            <td class="reason">全国核心城市</td>
+            <td class="lonlat" title="CSV原始值">121.473523</td>
+            <td class="lonlat" title="CSV原始值">31.230427</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=31.230427&lon=121.473523&key=df46ff001e65813cab9576d8f0013d0f" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=31.230427&lon=121.473523&key=df46ff001e65813cab9576d8f0013d0f">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=121.473523&lat=31.230427&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=b23f383b6d266b958c5152b58e315e40566c59554b4244a513c8b512fab27fd7" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=121.473523&lat=31.230427&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=b23f383b6d266b958c5152b58e315e40566c59554b4244a513c8b512fab27fd7">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">4</td>
+            <td class="name">重庆市<span class="dup"></span></td>
+            <td class="cat">直辖市</td>
+            <td class="reason">全国核心城市</td>
+            <td class="lonlat" title="CSV原始值">106.5227016</td>
+            <td class="lonlat" title="CSV原始值">29.54407809</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=29.54407809&lon=106.5227016&key=ac1a7bb4a3114b78362d902bb1069469" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=29.54407809&lon=106.5227016&key=ac1a7bb4a3114b78362d902bb1069469">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=106.5227016&lat=29.54407809&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=e30c29bacebf1fcc3fad0c5954814bd060301f708a72d8d5f9281dcf52395662" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=106.5227016&lat=29.54407809&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=e30c29bacebf1fcc3fad0c5954814bd060301f708a72d8d5f9281dcf52395662">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">5</td>
+            <td class="name">沈阳市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">东北代表</td>
+            <td class="lonlat" title="CSV原始值">123.3833914</td>
+            <td class="lonlat" title="CSV原始值">41.80199341</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=41.80199341&lon=123.3833914&key=8781cc97fb534bffbd1c4d6a6628152e" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=41.80199341&lon=123.3833914&key=8781cc97fb534bffbd1c4d6a6628152e">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=123.3833914&lat=41.80199341&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=4aac47949a2c1a18dbe42d6bf2bceae48bfc189e152f616b1469dda692c195ab" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=123.3833914&lat=41.80199341&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=4aac47949a2c1a18dbe42d6bf2bceae48bfc189e152f616b1469dda692c195ab">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">6</td>
+            <td class="name">大连市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">沿海气候</td>
+            <td class="lonlat" title="CSV原始值">121.5765993</td>
+            <td class="lonlat" title="CSV原始值">38.94382049</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=38.94382049&lon=121.5765993&key=1ee52fa6c0f87023b22b8b5d6f41d5d0" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=38.94382049&lon=121.5765993&key=1ee52fa6c0f87023b22b8b5d6f41d5d0">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=121.5765993&lat=38.94382049&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=ced3221c10a8dd745adf4212940fbaeee4acb00ead170b582a31c2287b3a550a" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=121.5765993&lat=38.94382049&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=ced3221c10a8dd745adf4212940fbaeee4acb00ead170b582a31c2287b3a550a">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">7</td>
+            <td class="name">长春市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">东北代表</td>
+            <td class="lonlat" title="CSV原始值">125.3500003</td>
+            <td class="lonlat" title="CSV原始值">43.86666945</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=43.86666945&lon=125.3500003&key=dc2419ead71af67588726c8f9f125ef8" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=43.86666945&lon=125.3500003&key=dc2419ead71af67588726c8f9f125ef8">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=125.3500003&lat=43.86666945&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=fa0eaa266adab57018540a6a628e1c4cc35a3b034ea018cc3eb18fd6e2b58543" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=125.3500003&lat=43.86666945&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=fa0eaa266adab57018540a6a628e1c4cc35a3b034ea018cc3eb18fd6e2b58543">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">8</td>
+            <td class="name">延吉市<span class="dup"></span></td>
+            <td class="cat">极端天气</td>
+            <td class="reason">边境气候</td>
+            <td class="lonlat" title="CSV原始值">129.5115995</td>
+            <td class="lonlat" title="CSV原始值">42.90673053</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=42.90673053&lon=129.5115995&key=325b867b996bdc855906d5b916a0bfd2" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=42.90673053&lon=129.5115995&key=325b867b996bdc855906d5b916a0bfd2">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=129.5115995&lat=42.90673053&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=23ae32ff27038014e0962f1318b4e2053000d1a5a3df6601368dd9e9ee9e5f66" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=129.5115995&lat=42.90673053&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=23ae32ff27038014e0962f1318b4e2053000d1a5a3df6601368dd9e9ee9e5f66">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">9</td>
+            <td class="name">哈尔滨市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">严寒气候</td>
+            <td class="lonlat" title="CSV原始值">126.6225811</td>
+            <td class="lonlat" title="CSV原始值">45.75521417</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=45.75521417&lon=126.6225811&key=9f7fa64b7f7f8b8be3998b2f4378660d" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=45.75521417&lon=126.6225811&key=9f7fa64b7f7f8b8be3998b2f4378660d">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=126.6225811&lat=45.75521417&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=ad1bdf05390998d8bcedbd32c4e71ea9718d945d2c5d3232f48cffa3293d9f2c" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=126.6225811&lat=45.75521417&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=ad1bdf05390998d8bcedbd32c4e71ea9718d945d2c5d3232f48cffa3293d9f2c">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">10</td>
+            <td class="name">齐齐哈尔市<span class="dup"></span></td>
+            <td class="cat">极端天气</td>
+            <td class="reason">严寒气候</td>
+            <td class="lonlat" title="CSV原始值">123.9650286</td>
+            <td class="lonlat" title="CSV原始值">47.34411388</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=47.34411388&lon=123.9650286&key=88eb45f59b75f7c6aa0c6c04d513aa26" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=47.34411388&lon=123.9650286&key=88eb45f59b75f7c6aa0c6c04d513aa26">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=123.9650286&lat=47.34411388&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=13443c6a0ccf270b77f36e23ba1e1230393ffa058cbe00ee6ee7e872015e5301" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=123.9650286&lat=47.34411388&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=13443c6a0ccf270b77f36e23ba1e1230393ffa058cbe00ee6ee7e872015e5301">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">11</td>
+            <td class="name">佳木斯市<span class="dup"></span></td>
+            <td class="cat">极端天气</td>
+            <td class="reason">降雪场景</td>
+            <td class="lonlat" title="CSV原始值">130.3642752</td>
+            <td class="lonlat" title="CSV原始值">46.79619327</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=46.79619327&lon=130.3642752&key=4034bc5d056363e80a12f591fd99a447" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=46.79619327&lon=130.3642752&key=4034bc5d056363e80a12f591fd99a447">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=130.3642752&lat=46.79619327&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=7339bf1b8bc962be5c82c8d725039ac8444906e7f9663cf1a0d3e51d51615349" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=130.3642752&lat=46.79619327&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=7339bf1b8bc962be5c82c8d725039ac8444906e7f9663cf1a0d3e51d51615349">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">12</td>
+            <td class="name">漠河市<span class="dup"></span></td>
+            <td class="cat">极端天气</td>
+            <td class="reason">极寒气候</td>
+            <td class="lonlat" title="CSV原始值">122.538592</td>
+            <td class="lonlat" title="CSV原始值">52.97801545</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=52.97801545&lon=122.538592&key=2714933c3f16b92b9ac7c48b34e3808b" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=52.97801545&lon=122.538592&key=2714933c3f16b92b9ac7c48b34e3808b">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=122.538592&lat=52.97801545&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=b318804479a6a14d33c5dbd6c2dda4c0978fb449ca25db3124fabe29d27b5c97" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=122.538592&lat=52.97801545&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=b318804479a6a14d33c5dbd6c2dda4c0978fb449ca25db3124fabe29d27b5c97">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">13</td>
+            <td class="name">郑州市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">华中代表</td>
+            <td class="lonlat" title="CSV原始值">113.6548802</td>
+            <td class="lonlat" title="CSV原始值">34.76467175</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.76467175&lon=113.6548802&key=f5a59a851cb6dbc27b249add440a1975" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.76467175&lon=113.6548802&key=f5a59a851cb6dbc27b249add440a1975">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.6548802&lat=34.76467175&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=c28f284fbf204682cd4eff07606baf546ed2c169be39e36aa40c1998c84bcb05" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.6548802&lat=34.76467175&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=c28f284fbf204682cd4eff07606baf546ed2c169be39e36aa40c1998c84bcb05">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">14</td>
+            <td class="name">洛阳市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">中原代表</td>
+            <td class="lonlat" title="CSV原始值">112.361271</td>
+            <td class="lonlat" title="CSV原始值">34.67144594</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.67144594&lon=112.361271&key=81ac2ae3b4ef5d3f922b4b4f71c21520" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.67144594&lon=112.361271&key=81ac2ae3b4ef5d3f922b4b4f71c21520">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=112.361271&lat=34.67144594&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=008bcaaaf2e0f2b1dcb91effa0c1158dbdaf27475d4853ce3ae6b7e6293eef9b" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=112.361271&lat=34.67144594&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=008bcaaaf2e0f2b1dcb91effa0c1158dbdaf27475d4853ce3ae6b7e6293eef9b">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">15</td>
+            <td class="name">武汉市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">华中代表</td>
+            <td class="lonlat" title="CSV原始值">114.335269</td>
+            <td class="lonlat" title="CSV原始值">30.637462</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=30.637462&lon=114.335269&key=f282ea8999dfd109b65a596567edc9f4" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=30.637462&lon=114.335269&key=f282ea8999dfd109b65a596567edc9f4">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=114.335269&lat=30.637462&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=104fdd61ef46b6319995793277cede08a7182e14cd4c5dfcc11f1423c11a257b" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=114.335269&lat=30.637462&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=104fdd61ef46b6319995793277cede08a7182e14cd4c5dfcc11f1423c11a257b">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">16</td>
+            <td class="name">长沙市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">华中代表</td>
+            <td class="lonlat" title="CSV原始值">112.9684653</td>
+            <td class="lonlat" title="CSV原始值">28.19765946</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=28.19765946&lon=112.9684653&key=fded683ed5dafe0f4849310c911c102f" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=28.19765946&lon=112.9684653&key=fded683ed5dafe0f4849310c911c102f">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=112.9684653&lat=28.19765946&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=95a0ec0f86cb98946c9345e0f2cedc2d6033b49e07a3a5dfb5a51fa7df55cca2" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=112.9684653&lat=28.19765946&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=95a0ec0f86cb98946c9345e0f2cedc2d6033b49e07a3a5dfb5a51fa7df55cca2">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">17</td>
+            <td class="name">南宁市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">华南代表</td>
+            <td class="lonlat" title="CSV原始值">108.31177</td>
+            <td class="lonlat" title="CSV原始值">22.806543</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=22.806543&lon=108.31177&key=eb8c13b73712bacb3c0f35e649e16672" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=22.806543&lon=108.31177&key=eb8c13b73712bacb3c0f35e649e16672">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=108.31177&lat=22.806543&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=1bd32282c42bea20a343782a16cfeacab4a8641f3ec39537460da4c926f5f7f0" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=108.31177&lat=22.806543&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=1bd32282c42bea20a343782a16cfeacab4a8641f3ec39537460da4c926f5f7f0">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">18</td>
+            <td class="name">广州市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">强对流高发</td>
+            <td class="lonlat" title="CSV原始值">113.264432</td>
+            <td class="lonlat" title="CSV原始值">23.129173</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=23.129173&lon=113.264432&key=39346b82b3bc9ee33952fd34a05a4c93" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=23.129173&lon=113.264432&key=39346b82b3bc9ee33952fd34a05a4c93">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.264432&lat=23.129173&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=e03c7c706a22fed30c01fccbece969f3c6ee060c66b2e97dce7985b18ba94a14" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.264432&lat=23.129173&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=e03c7c706a22fed30c01fccbece969f3c6ee060c66b2e97dce7985b18ba94a14">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">19</td>
+            <td class="name">深圳市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">暴雨高发</td>
+            <td class="lonlat" title="CSV原始值">114.058229</td>
+            <td class="lonlat" title="CSV原始值">22.543137</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=22.543137&lon=114.058229&key=401952f94ac5643edc57ca23a1bce8dd" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=22.543137&lon=114.058229&key=401952f94ac5643edc57ca23a1bce8dd">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=114.058229&lat=22.543137&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=48377f3ec1774cc3b11da4a82f2a62e09c419494f024d14c13637bd3d4798d61" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=114.058229&lat=22.543137&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=48377f3ec1774cc3b11da4a82f2a62e09c419494f024d14c13637bd3d4798d61">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">20</td>
+            <td class="name">珠海市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">沿海气候</td>
+            <td class="lonlat" title="CSV原始值">113.576576</td>
+            <td class="lonlat" title="CSV原始值">22.27099</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=22.27099&lon=113.576576&key=2d14a33ea02484573a367d53fdb0ab2f" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=22.27099&lon=113.576576&key=2d14a33ea02484573a367d53fdb0ab2f">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.576576&lat=22.27099&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=1113d5fcb2688753f268f33d3fe63f80a7f7000029cdad0754e55716d0b0c1b0" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.576576&lat=22.27099&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=1113d5fcb2688753f268f33d3fe63f80a7f7000029cdad0754e55716d0b0c1b0">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">21</td>
+            <td class="name">佛山市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">用户覆盖高</td>
+            <td class="lonlat" title="CSV原始值">113.121428</td>
+            <td class="lonlat" title="CSV原始值">23.02152</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=23.02152&lon=113.121428&key=3fbf183fb654017648af3131475f7ece" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=23.02152&lon=113.121428&key=3fbf183fb654017648af3131475f7ece">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.121428&lat=23.02152&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=1a79c037d68652d2a3d19e1565dbe3f5cf6e851c78004323bd9b5db8389608f0" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.121428&lat=23.02152&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=1a79c037d68652d2a3d19e1565dbe3f5cf6e851c78004323bd9b5db8389608f0">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">22</td>
+            <td class="name">东莞市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">用户覆盖高</td>
+            <td class="lonlat" title="CSV原始值">113.751647</td>
+            <td class="lonlat" title="CSV原始值">23.020083</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=23.020083&lon=113.751647&key=72d73461e12f6fd4564559c010872d62" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=23.020083&lon=113.751647&key=72d73461e12f6fd4564559c010872d62">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.751647&lat=23.020083&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=8f509acb6f4d0efaf234a1b4efffe88ca66c91a234e7fe317b6a11c6627133e5" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.751647&lat=23.020083&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=8f509acb6f4d0efaf234a1b4efffe88ca66c91a234e7fe317b6a11c6627133e5">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">23</td>
+            <td class="name">海口市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">台风高发</td>
+            <td class="lonlat" title="CSV原始值">110.3433604</td>
+            <td class="lonlat" title="CSV原始值">20.03920587</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=20.03920587&lon=110.3433604&key=a6dab156bfed2d12f71407270a4162a2" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=20.03920587&lon=110.3433604&key=a6dab156bfed2d12f71407270a4162a2">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=110.3433604&lat=20.03920587&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=57c6840486f78764859c9a2a6e0c0d5e467104247e79c7b321dfd71a5f33e5ff" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=110.3433604&lat=20.03920587&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=57c6840486f78764859c9a2a6e0c0d5e467104247e79c7b321dfd71a5f33e5ff">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">24</td>
+            <td class="name">三亚市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">热带气候</td>
+            <td class="lonlat" title="CSV原始值">109.50782</td>
+            <td class="lonlat" title="CSV原始值">18.234043</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=18.234043&lon=109.50782&key=a0c6f4af2b3a3ec4dffc098c7adba1e7" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=18.234043&lon=109.50782&key=a0c6f4af2b3a3ec4dffc098c7adba1e7">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=109.50782&lat=18.234043&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=3c8b319049d32fe6c62afe9315ad2ebf2137cca4edf3ee9c0997fea8f4ce7feb" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=109.50782&lat=18.234043&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=3c8b319049d32fe6c62afe9315ad2ebf2137cca4edf3ee9c0997fea8f4ce7feb">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">25</td>
+            <td class="name">南京市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">华东代表</td>
+            <td class="lonlat" title="CSV原始值">118.7980508</td>
+            <td class="lonlat" title="CSV原始值">32.08534463</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=32.08534463&lon=118.7980508&key=80d6fbe24dc268780334e19553751ae9" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=32.08534463&lon=118.7980508&key=80d6fbe24dc268780334e19553751ae9">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=118.7980508&lat=32.08534463&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=c59712a27eccef2fc821e69f8d0469fcf77d1d645dda41dcacff78321b224402" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=118.7980508&lat=32.08534463&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=c59712a27eccef2fc821e69f8d0469fcf77d1d645dda41dcacff78321b224402">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">26</td>
+            <td class="name">无锡市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">用户覆盖高</td>
+            <td class="lonlat" title="CSV原始值">120.2990527</td>
+            <td class="lonlat" title="CSV原始值">31.57562716</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=31.57562716&lon=120.2990527&key=f2e1b90d64f081fc223e63b9119d160f" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=31.57562716&lon=120.2990527&key=f2e1b90d64f081fc223e63b9119d160f">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=120.2990527&lat=31.57562716&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=825ca0bd60895f1a30f3673f10ad4fe11609b65ce42205f9b0aebdf4271a22b1" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=120.2990527&lat=31.57562716&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=825ca0bd60895f1a30f3673f10ad4fe11609b65ce42205f9b0aebdf4271a22b1">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">27</td>
+            <td class="name">徐州市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">华东代表</td>
+            <td class="lonlat" title="CSV原始值">117.1825274</td>
+            <td class="lonlat" title="CSV原始值">34.26360824</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.26360824&lon=117.1825274&key=3b276dc7478931683fc6fe975db12177" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.26360824&lon=117.1825274&key=3b276dc7478931683fc6fe975db12177">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=117.1825274&lat=34.26360824&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=a2377c7a291de2e53a07171e2af22218e3c618219ddd35867462ec3b43374851" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=117.1825274&lat=34.26360824&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=a2377c7a291de2e53a07171e2af22218e3c618219ddd35867462ec3b43374851">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">28</td>
+            <td class="name">苏州市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">用户覆盖高</td>
+            <td class="lonlat" title="CSV原始值">120.585372</td>
+            <td class="lonlat" title="CSV原始值">31.298829</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=31.298829&lon=120.585372&key=ae0dafc94a02901f1c7db77fa42e2fd6" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=31.298829&lon=120.585372&key=ae0dafc94a02901f1c7db77fa42e2fd6">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=120.585372&lat=31.298829&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=7aa2d51ce2e342b677aaefe0b187d36020a1fb686c51b8f244301daef1dff8f5" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=120.585372&lat=31.298829&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=7aa2d51ce2e342b677aaefe0b187d36020a1fb686c51b8f244301daef1dff8f5">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">29</td>
+            <td class="name">杭州市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">华东代表</td>
+            <td class="lonlat" title="CSV原始值">120.1650798</td>
+            <td class="lonlat" title="CSV原始值">30.25258003</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=30.25258003&lon=120.1650798&key=3a61d1bf9d7f63b96d5edcb62f112ef0" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=30.25258003&lon=120.1650798&key=3a61d1bf9d7f63b96d5edcb62f112ef0">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=120.1650798&lat=30.25258003&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=c2e45dca96fd754abd38fec0467ea9a76994c2556e64a8728e7f9b4c3ab024f2" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=120.1650798&lat=30.25258003&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=c2e45dca96fd754abd38fec0467ea9a76994c2556e64a8728e7f9b4c3ab024f2">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">30</td>
+            <td class="name">宁波市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">台风影响</td>
+            <td class="lonlat" title="CSV原始值">121.5417738</td>
+            <td class="lonlat" title="CSV原始值">29.87222144</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=29.87222144&lon=121.5417738&key=3ba5d29dd97928e1c59596f69e38af61" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=29.87222144&lon=121.5417738&key=3ba5d29dd97928e1c59596f69e38af61">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=121.5417738&lat=29.87222144&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=dfb0c33f7f19d14b75ab4b376b2e9383e9419b898c3b3c7d249443cecb0be535" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=121.5417738&lat=29.87222144&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=dfb0c33f7f19d14b75ab4b376b2e9383e9419b898c3b3c7d249443cecb0be535">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">31</td>
+            <td class="name">温州市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">台风影响</td>
+            <td class="lonlat" title="CSV原始值">120.6478906</td>
+            <td class="lonlat" title="CSV原始值">28.00269239</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=28.00269239&lon=120.6478906&key=9e9ded3ea30cd770599c3f60efc32e7e" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=28.00269239&lon=120.6478906&key=9e9ded3ea30cd770599c3f60efc32e7e">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=120.6478906&lat=28.00269239&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=09460dff1a910944f1e1b1c0e1fece2431e8b837d0b004e72e5d6e2ecbbe143d" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=120.6478906&lat=28.00269239&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=09460dff1a910944f1e1b1c0e1fece2431e8b837d0b004e72e5d6e2ecbbe143d">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">32</td>
+            <td class="name">南昌市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">华中代表</td>
+            <td class="lonlat" title="CSV原始值">115.89992</td>
+            <td class="lonlat" title="CSV原始值">28.675991</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=28.675991&lon=115.89992&key=908aaef949b2217204dedd7503b72567" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=28.675991&lon=115.89992&key=908aaef949b2217204dedd7503b72567">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=115.89992&lat=28.675991&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=015a67631058bd8389a4dce03e3717b4b27d60a35665b6fff9a88809e3c9114b" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=115.89992&lat=28.675991&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=015a67631058bd8389a4dce03e3717b4b27d60a35665b6fff9a88809e3c9114b">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">33</td>
+            <td class="name">南昌县<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">华中代表</td>
+            <td class="lonlat" title="CSV原始值">115.93243</td>
+            <td class="lonlat" title="CSV原始值">28.552488</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=28.552488&lon=115.93243&key=8b4d60a7846b1b5d9d4508a12dc07fb0" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=28.552488&lon=115.93243&key=8b4d60a7846b1b5d9d4508a12dc07fb0">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=115.93243&lat=28.552488&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=aaa699cbe71ebc702be0e28679b2666e0c2f34f60b78abd93b4cf0eef6cb28f5" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=115.93243&lat=28.552488&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=aaa699cbe71ebc702be0e28679b2666e0c2f34f60b78abd93b4cf0eef6cb28f5">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">34</td>
+            <td class="name">济南市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">华东代表</td>
+            <td class="lonlat" title="CSV原始值">116.9671014</td>
+            <td class="lonlat" title="CSV原始值">36.65554103</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=36.65554103&lon=116.9671014&key=00705346b3af54c97c4920c0bdc1a1f6" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=36.65554103&lon=116.9671014&key=00705346b3af54c97c4920c0bdc1a1f6">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=116.9671014&lat=36.65554103&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=ac46efffa2d9c51fee59cf2eef6aa4ceea6207818b5641eca09e3eee2659ea7e" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=116.9671014&lat=36.65554103&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=ac46efffa2d9c51fee59cf2eef6aa4ceea6207818b5641eca09e3eee2659ea7e">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">35</td>
+            <td class="name">青岛市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">沿海气候</td>
+            <td class="lonlat" title="CSV原始值">120.3429589</td>
+            <td class="lonlat" title="CSV原始值">36.08764486</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=36.08764486&lon=120.3429589&key=cc27796645570ae020f3391197d45b5d" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=36.08764486&lon=120.3429589&key=cc27796645570ae020f3391197d45b5d">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=120.3429589&lat=36.08764486&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=0107020da2970fba5384c391fdca5389fe8d8b8ed1ca88a855cccdff31a5f284" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=120.3429589&lat=36.08764486&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=0107020da2970fba5384c391fdca5389fe8d8b8ed1ca88a855cccdff31a5f284">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">36</td>
+            <td class="name">烟台市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">沿海气候</td>
+            <td class="lonlat" title="CSV原始值">121.3602992</td>
+            <td class="lonlat" title="CSV原始值">37.5452831</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=37.5452831&lon=121.3602992&key=e02bd1326517fa8c40565633bbd18d7e" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=37.5452831&lon=121.3602992&key=e02bd1326517fa8c40565633bbd18d7e">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=121.3602992&lat=37.5452831&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=76973876a4d813cc2cf24491b98351b7437f47950ccf2728180809699bfe00bf" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=121.3602992&lat=37.5452831&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=76973876a4d813cc2cf24491b98351b7437f47950ccf2728180809699bfe00bf">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">37</td>
+            <td class="name">合肥市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">华东代表</td>
+            <td class="lonlat" title="CSV原始值">117.2757</td>
+            <td class="lonlat" title="CSV原始值">31.863255</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=31.863255&lon=117.2757&key=df105a06dd6f775023bb47b6f8e6047c" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=31.863255&lon=117.2757&key=df105a06dd6f775023bb47b6f8e6047c">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=117.2757&lat=31.863255&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=7aa04d3bb90210f38e0ab4795b93a1da9e98aa6047ce29a1e9632dce0601a2e5" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=117.2757&lat=31.863255&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=7aa04d3bb90210f38e0ab4795b93a1da9e98aa6047ce29a1e9632dce0601a2e5">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">38</td>
+            <td class="name">福州市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">沿海气候</td>
+            <td class="lonlat" title="CSV原始值">119.29781</td>
+            <td class="lonlat" title="CSV原始值">26.07859</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=26.07859&lon=119.29781&key=7dd8bacacdf6cdabb2d67686ec1ba6e1" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=26.07859&lon=119.29781&key=7dd8bacacdf6cdabb2d67686ec1ba6e1">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=119.29781&lat=26.07859&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=69a7b333e3b24c338f90bc92c7c14d482d5c8fde795f130c54d7fb8261dc48ad" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=119.29781&lat=26.07859&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=69a7b333e3b24c338f90bc92c7c14d482d5c8fde795f130c54d7fb8261dc48ad">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">39</td>
+            <td class="name">厦门市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">台风影响</td>
+            <td class="lonlat" title="CSV原始值">118.08752</td>
+            <td class="lonlat" title="CSV原始值">24.457436</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=24.457436&lon=118.08752&key=7ddc640c176258a364c39d07306b90b5" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=24.457436&lon=118.08752&key=7ddc640c176258a364c39d07306b90b5">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=118.08752&lat=24.457436&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=c11be63020ce35276517606b9faf9ed17679c357d5832b356067c2f7ee3bf56d" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=118.08752&lat=24.457436&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=c11be63020ce35276517606b9faf9ed17679c357d5832b356067c2f7ee3bf56d">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">40</td>
+            <td class="name">石家庄市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">华北代表</td>
+            <td class="lonlat" title="CSV原始值">114.4985925</td>
+            <td class="lonlat" title="CSV原始值">38.0419423</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=38.0419423&lon=114.4985925&key=26df19686cd075b5c830001079ac5048" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=38.0419423&lon=114.4985925&key=26df19686cd075b5c830001079ac5048">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=114.4985925&lat=38.0419423&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=1fd4a2f172e7129a048885df99c6d66a6741370686a59887aae293d61ccdf323" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=114.4985925&lat=38.0419423&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=1fd4a2f172e7129a048885df99c6d66a6741370686a59887aae293d61ccdf323">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">41</td>
+            <td class="name">唐山市<span class="dup"></span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">华北代表</td>
+            <td class="lonlat" title="CSV原始值">118.180048</td>
+            <td class="lonlat" title="CSV原始值">39.61520269</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=39.61520269&lon=118.180048&key=027260efaaf330bd1682c33978d94b10" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=39.61520269&lon=118.180048&key=027260efaaf330bd1682c33978d94b10">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=118.180048&lat=39.61520269&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=770dc4d4fb1c839542bd14600861c8842b301d1eadbf22dbe7c3598dbca181dc" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=118.180048&lat=39.61520269&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=770dc4d4fb1c839542bd14600861c8842b301d1eadbf22dbe7c3598dbca181dc">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">42</td>
+            <td class="name">太原市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">华北代表</td>
+            <td class="lonlat" title="CSV原始值">112.551696</td>
+            <td class="lonlat" title="CSV原始值">37.89305015</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=37.89305015&lon=112.551696&key=344c76d421ef4d42c5225549c3f75fb2" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=37.89305015&lon=112.551696&key=344c76d421ef4d42c5225549c3f75fb2">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=112.551696&lat=37.89305015&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=60124613682a3246684a939a5b8ad21b2bed3d219ecc00d895d3adff585ada80" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=112.551696&lat=37.89305015&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=60124613682a3246684a939a5b8ad21b2bed3d219ecc00d895d3adff585ada80">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">43</td>
+            <td class="name">呼和浩特市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">草原气候</td>
+            <td class="lonlat" title="CSV原始值">111.6486551</td>
+            <td class="lonlat" title="CSV原始值">40.81439383</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=40.81439383&lon=111.6486551&key=be9eea424e848d6dda25ec67b69bb020" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=40.81439383&lon=111.6486551&key=be9eea424e848d6dda25ec67b69bb020">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=111.6486551&lat=40.81439383&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=7f1569a93f2863d9acbe85871df9665706cee4cf30f2c679b578602f623cc41c" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=111.6486551&lat=40.81439383&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=7f1569a93f2863d9acbe85871df9665706cee4cf30f2c679b578602f623cc41c">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">44</td>
+            <td class="name">西安市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">西北代表</td>
+            <td class="lonlat" title="CSV原始值">108.883189</td>
+            <td class="lonlat" title="CSV原始值">34.26591218</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.26591218&lon=108.883189&key=669862e4436c4f4ef03625b303c73798" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.26591218&lon=108.883189&key=669862e4436c4f4ef03625b303c73798">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=108.883189&lat=34.26591218&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=f695c699e2257c4447815aa9c5c0f82bab12bab2973ae7f4ef5deec6c514b6b7" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=108.883189&lat=34.26591218&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=f695c699e2257c4447815aa9c5c0f82bab12bab2973ae7f4ef5deec6c514b6b7">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">45</td>
+            <td class="name">银川市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">西北代表</td>
+            <td class="lonlat" title="CSV原始值">106.2623668</td>
+            <td class="lonlat" title="CSV原始值">38.46798039</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=38.46798039&lon=106.2623668&key=f199b93c1f57eba69e840344a0f7b62c" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=38.46798039&lon=106.2623668&key=f199b93c1f57eba69e840344a0f7b62c">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=106.2623668&lat=38.46798039&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=bd060bff1f735ce6572ae6fe0d444a18593ac29167756ccdccd284a7ade1cecf" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=106.2623668&lat=38.46798039&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=bd060bff1f735ce6572ae6fe0d444a18593ac29167756ccdccd284a7ade1cecf">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">46</td>
+            <td class="name">兰州市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">西北代表</td>
+            <td class="lonlat" title="CSV原始值">103.7508902</td>
+            <td class="lonlat" title="CSV原始值">36.06854444</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=36.06854444&lon=103.7508902&key=062b9dcbe8d3eaeec9502172d13f588b" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=36.06854444&lon=103.7508902&key=062b9dcbe8d3eaeec9502172d13f588b">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=103.7508902&lat=36.06854444&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=bc4e79c708e4b3d2aae4186bae19b3008fb396fc7d7f3e36e372396054854a50" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=103.7508902&lat=36.06854444&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=bc4e79c708e4b3d2aae4186bae19b3008fb396fc7d7f3e36e372396054854a50">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">47</td>
+            <td class="name">敦煌市<span class="dup"></span></td>
+            <td class="cat">极端天气</td>
+            <td class="reason">沙尘场景</td>
+            <td class="lonlat" title="CSV原始值">94.6633526</td>
+            <td class="lonlat" title="CSV原始值">40.13730978</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=40.13730978&lon=94.6633526&key=f8ac41efbb5aed50568d56f7622a046b" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=40.13730978&lon=94.6633526&key=f8ac41efbb5aed50568d56f7622a046b">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=94.6633526&lat=40.13730978&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=77f645c0d2778b6f16fde48d2718a3ab51830fe128b17129f78324bc96cb1765" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=94.6633526&lat=40.13730978&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=77f645c0d2778b6f16fde48d2718a3ab51830fe128b17129f78324bc96cb1765">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">48</td>
+            <td class="name">西宁市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">高原气候</td>
+            <td class="lonlat" title="CSV原始值">101.7779873</td>
+            <td class="lonlat" title="CSV原始值">36.6212465</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=36.6212465&lon=101.7779873&key=47e209cfc1e5d76433c7e30f4e3e008d" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=36.6212465&lon=101.7779873&key=47e209cfc1e5d76433c7e30f4e3e008d">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=101.7779873&lat=36.6212465&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=12efce45bef4bd38d5531c6362a212a03b0b9776b15a8bfc7be6367a70f53320" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=101.7779873&lat=36.6212465&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=12efce45bef4bd38d5531c6362a212a03b0b9776b15a8bfc7be6367a70f53320">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">49</td>
+            <td class="name">乌鲁木齐市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">干旱气候</td>
+            <td class="lonlat" title="CSV原始值">87.58649898</td>
+            <td class="lonlat" title="CSV原始值">43.78259334</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=43.78259334&lon=87.58649898&key=5d13df83f691be07171268a3b41d988d" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=43.78259334&lon=87.58649898&key=5d13df83f691be07171268a3b41d988d">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=87.58649898&lat=43.78259334&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=47217f546dc661f9242fc919d6202af3ca893a88e5f4417a90d2d702f7f4ae9c" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=87.58649898&lat=43.78259334&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=47217f546dc661f9242fc919d6202af3ca893a88e5f4417a90d2d702f7f4ae9c">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">50</td>
+            <td class="name">吐鲁番地区<span class="dup"></span></td>
+            <td class="cat">极端天气</td>
+            <td class="reason">极热气候</td>
+            <td class="lonlat" title="CSV原始值">89.17833267</td>
+            <td class="lonlat" title="CSV原始值">42.97380651</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=42.97380651&lon=89.17833267&key=acba4b22f664e7e82fcfab3fd63ecf20" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=42.97380651&lon=89.17833267&key=acba4b22f664e7e82fcfab3fd63ecf20">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=89.17833267&lat=42.97380651&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=dd8733ad85a300479b2d72836a52f5cf9ceb87fe0634e170f171191a137d1a40" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=89.17833267&lat=42.97380651&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=dd8733ad85a300479b2d72836a52f5cf9ceb87fe0634e170f171191a137d1a40">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">51</td>
+            <td class="name">喀什地区<span class="dup"></span></td>
+            <td class="cat">极端天气</td>
+            <td class="reason">干旱气候</td>
+            <td class="lonlat" title="CSV原始值">75.98790145</td>
+            <td class="lonlat" title="CSV原始值">39.46036677</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=39.46036677&lon=75.98790145&key=76eafd7c3d8e44653b9d287a65b4cf5b" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=39.46036677&lon=75.98790145&key=76eafd7c3d8e44653b9d287a65b4cf5b">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=75.98790145&lat=39.46036677&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=dbfa87c5c04d7a4cc7f23b63eda93744643bd56da97932d1c0593728cd3ebf3c" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=75.98790145&lat=39.46036677&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=dbfa87c5c04d7a4cc7f23b63eda93744643bd56da97932d1c0593728cd3ebf3c">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">52</td>
+            <td class="name">库尔勒市<span class="dup"></span></td>
+            <td class="cat">极端天气</td>
+            <td class="reason">干旱场景</td>
+            <td class="lonlat" title="CSV原始值">86.136261</td>
+            <td class="lonlat" title="CSV原始值">41.756794</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=41.756794&lon=86.136261&key=a8cb539a00abea2f03a9db5e5b879d0d" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=41.756794&lon=86.136261&key=a8cb539a00abea2f03a9db5e5b879d0d">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=86.136261&lat=41.756794&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=304d9f0e72dae1ad31a1b0856de94638beef3732e3bc12c8b8f3d81a6167dea7" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=86.136261&lat=41.756794&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=304d9f0e72dae1ad31a1b0856de94638beef3732e3bc12c8b8f3d81a6167dea7">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">53</td>
+            <td class="name">阿勒泰地区<span class="dup"></span></td>
+            <td class="cat">极端天气</td>
+            <td class="reason">冰雪场景</td>
+            <td class="lonlat" title="CSV原始值">88.13333333</td>
+            <td class="lonlat" title="CSV原始值">48.21666666</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=48.21666666&lon=88.13333333&key=5624b2dba59f309f8b626c32eb42e1c9" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=48.21666666&lon=88.13333333&key=5624b2dba59f309f8b626c32eb42e1c9">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=88.13333333&lat=48.21666666&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=d0047c542bb2a5fb741c312a3b893d45a53b8dc59ecbb5fcf1096f638f61f328" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=88.13333333&lat=48.21666666&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=d0047c542bb2a5fb741c312a3b893d45a53b8dc59ecbb5fcf1096f638f61f328">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">54</td>
+            <td class="name">成都市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">西南代表</td>
+            <td class="lonlat" title="CSV原始值">104.0713203</td>
+            <td class="lonlat" title="CSV原始值">30.66999375</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=30.66999375&lon=104.0713203&key=d2720520cbd82546c5801ba4a135c527" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=30.66999375&lon=104.0713203&key=d2720520cbd82546c5801ba4a135c527">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=104.0713203&lat=30.66999375&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=6980d025ca60c0aedde00dd7507d043ce8d1bab5b845f5985a377425d8a82f90" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=104.0713203&lat=30.66999375&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=6980d025ca60c0aedde00dd7507d043ce8d1bab5b845f5985a377425d8a82f90">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">55</td>
+            <td class="name">昆明市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">高原气候</td>
+            <td class="lonlat" title="CSV原始值">102.7021004</td>
+            <td class="lonlat" title="CSV原始值">25.05102907</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=25.05102907&lon=102.7021004&key=c06b284e94686f44aca531452ad30c62" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=25.05102907&lon=102.7021004&key=c06b284e94686f44aca531452ad30c62">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=102.7021004&lat=25.05102907&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=47b98aeea20977aa044cdd277a895e69f492652b72208e360c5a94fa8e885922" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=102.7021004&lat=25.05102907&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=47b98aeea20977aa044cdd277a895e69f492652b72208e360c5a94fa8e885922">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">56</td>
+            <td class="name">丽江市<span class="dup"></span></td>
+            <td class="cat">极端天气</td>
+            <td class="reason">高海拔场景</td>
+            <td class="lonlat" title="CSV原始值">100.3666667</td>
+            <td class="lonlat" title="CSV原始值">27.45</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=27.45&lon=100.3666667&key=f125840ed2f0e3d16f61ebbc13d3d2a9" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=27.45&lon=100.3666667&key=f125840ed2f0e3d16f61ebbc13d3d2a9">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=100.3666667&lat=27.45&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=32d630a10c6d4b856927e2c70aae2a460f3e9cfe215ad9613296f9fe62913562" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=100.3666667&lat=27.45&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=32d630a10c6d4b856927e2c70aae2a460f3e9cfe215ad9613296f9fe62913562">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">57</td>
+            <td class="name">贵阳市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">高原山地</td>
+            <td class="lonlat" title="CSV原始值">106.7003035</td>
+            <td class="lonlat" title="CSV原始值">26.57193679</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=26.57193679&lon=106.7003035&key=07876b746d30058bf7505efe8ddaae39" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=26.57193679&lon=106.7003035&key=07876b746d30058bf7505efe8ddaae39">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=106.7003035&lat=26.57193679&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=4e64c387e9a760ee67e9e5e9a28aee51fba5eb8dc701920b1ab3d9ddba5838ef" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=106.7003035&lat=26.57193679&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=4e64c387e9a760ee67e9e5e9a28aee51fba5eb8dc701920b1ab3d9ddba5838ef">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">58</td>
+            <td class="name">拉萨市<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">高海拔</td>
+            <td class="lonlat" title="CSV原始值">91.1320863</td>
+            <td class="lonlat" title="CSV原始值">29.65070056</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=29.65070056&lon=91.1320863&key=aeb4a58a53f66393bac4393661fd3bdf" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=29.65070056&lon=91.1320863&key=aeb4a58a53f66393bac4393661fd3bdf">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=91.1320863&lat=29.65070056&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=1b7c2de43bf543db8e90b4f6e381bd21329ccc427acc9e466e3774df98ae7c55" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=91.1320863&lat=29.65070056&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=1b7c2de43bf543db8e90b4f6e381bd21329ccc427acc9e466e3774df98ae7c55">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">59</td>
+            <td class="name">香港特别行政区<span class="dup"></span></td>
+            <td class="cat">特别行政区</td>
+            <td class="reason">国际化重点</td>
+            <td class="lonlat" title="CSV原始值">114.15675</td>
+            <td class="lonlat" title="CSV原始值">22.280244</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=22.280244&lon=114.15675&key=0cd3d9c5f1e379a041774f58ff44f99f" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=22.280244&lon=114.15675&key=0cd3d9c5f1e379a041774f58ff44f99f">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=114.15675&lat=22.280244&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=e836f3686dbf6ae32c1c2e367e58b0f354884c652eb2021199a80bbe0d3eeb8e" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=114.15675&lat=22.280244&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=e836f3686dbf6ae32c1c2e367e58b0f354884c652eb2021199a80bbe0d3eeb8e">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">60</td>
+            <td class="name">澳门特别行政区<span class="dup"></span></td>
+            <td class="cat">特别行政区</td>
+            <td class="reason">国际化重点</td>
+            <td class="lonlat" title="CSV原始值">113.5442043</td>
+            <td class="lonlat" title="CSV原始值">22.20187633</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=22.20187633&lon=113.5442043&key=e7f01dca8969e0936cd9a8868ce5cf3b" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=22.20187633&lon=113.5442043&key=e7f01dca8969e0936cd9a8868ce5cf3b">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.5442043&lat=22.20187633&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=4a065430da491b875919d108df91b9116e1b4e768e5bf62058bb6b6058bca576" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.5442043&lat=22.20187633&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=4a065430da491b875919d108df91b9116e1b4e768e5bf62058bb6b6058bca576">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">61</td>
+            <td class="name">台北市<span class="dup"> (CSV重复行)</span></td>
+            <td class="cat">重点城市</td>
+            <td class="reason">国际化重点</td>
+            <td class="lonlat" title="CSV原始值">121.5066992</td>
+            <td class="lonlat" title="CSV原始值">25.03508868</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=25.03508868&lon=121.5066992&key=efa5f7a07365cf69e942e19f58366b16" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=25.03508868&lon=121.5066992&key=efa5f7a07365cf69e942e19f58366b16">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=121.5066992&lat=25.03508868&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=a7c408d995cf95d9edcfdebb5e42575f6abb239f75de209ddedd1c81318408c5" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=121.5066992&lat=25.03508868&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=a7c408d995cf95d9edcfdebb5e42575f6abb239f75de209ddedd1c81318408c5">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">62</td>
+            <td class="name">台北市<span class="dup"> (CSV重复行)</span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">国际化重点</td>
+            <td class="lonlat" title="CSV原始值">121.5066992</td>
+            <td class="lonlat" title="CSV原始值">25.03508868</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=25.03508868&lon=121.5066992&key=efa5f7a07365cf69e942e19f58366b16" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=25.03508868&lon=121.5066992&key=efa5f7a07365cf69e942e19f58366b16">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=121.5066992&lat=25.03508868&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=a7c408d995cf95d9edcfdebb5e42575f6abb239f75de209ddedd1c81318408c5" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=121.5066992&lat=25.03508868&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=a7c408d995cf95d9edcfdebb5e42575f6abb239f75de209ddedd1c81318408c5">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">63</td>
+            <td class="name">伦敦<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">欧洲核心城市</td>
+            <td class="lonlat" title="CSV原始值">-0.1198244</td>
+            <td class="lonlat" title="CSV原始值">51.5112139</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=51.5112139&lon=-0.1198244&key=fe8bc0c2006a503ce7ce8ddc0615ad0c" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=51.5112139&lon=-0.1198244&key=fe8bc0c2006a503ce7ce8ddc0615ad0c">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-0.1198244&lat=51.5112139&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=de6ae57993d38093a6488e09609aa389358e959b93719c020b42e598d7363301" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-0.1198244&lat=51.5112139&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=de6ae57993d38093a6488e09609aa389358e959b93719c020b42e598d7363301">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">64</td>
+            <td class="name">罗马<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">地中海气候</td>
+            <td class="lonlat" title="CSV原始值">12.4825199</td>
+            <td class="lonlat" title="CSV原始值">41.8929163</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=41.8929163&lon=12.4825199&key=2d67a1e752f51c6eb7a7ddc60300ef95" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=41.8929163&lon=12.4825199&key=2d67a1e752f51c6eb7a7ddc60300ef95">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=12.4825199&lat=41.8929163&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=0745a9f532cead552435f050178738174541f90879ac2861942d96a1d54e9241" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=12.4825199&lat=41.8929163&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=0745a9f532cead552435f050178738174541f90879ac2861942d96a1d54e9241">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">65</td>
+            <td class="name">马德里<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">欧洲内陆气候</td>
+            <td class="lonlat" title="CSV原始值">-3.7037902</td>
+            <td class="lonlat" title="CSV原始值">40.4167754</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=40.4167754&lon=-3.7037902&key=52edeaba1b5bcf9ab7001b741b1c5fb7" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=40.4167754&lon=-3.7037902&key=52edeaba1b5bcf9ab7001b741b1c5fb7">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-3.7037902&lat=40.4167754&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=0138e1f6a8360f00979d335be8d845b45b42cb3632b12bdab401285cf86758e5" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-3.7037902&lat=40.4167754&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=0138e1f6a8360f00979d335be8d845b45b42cb3632b12bdab401285cf86758e5">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">66</td>
+            <td class="name">巴黎<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">欧洲核心城市</td>
+            <td class="lonlat" title="CSV原始值">2.3522219</td>
+            <td class="lonlat" title="CSV原始值">48.856614</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=48.856614&lon=2.3522219&key=3e7f78a54512de972f6e5c572182b078" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=48.856614&lon=2.3522219&key=3e7f78a54512de972f6e5c572182b078">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=2.3522219&lat=48.856614&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=67fc503784293c3fbc74ceaf6911feb501fc2171f2191eb7d9e9cf2075f77e73" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=2.3522219&lat=48.856614&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=67fc503784293c3fbc74ceaf6911feb501fc2171f2191eb7d9e9cf2075f77e73">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">67</td>
+            <td class="name">柏林<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">欧洲核心城市</td>
+            <td class="lonlat" title="CSV原始值">13.404954</td>
+            <td class="lonlat" title="CSV原始值">52.5200066</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=52.5200066&lon=13.404954&key=c5803a6a141cd22a634734fcc791ceef" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=52.5200066&lon=13.404954&key=c5803a6a141cd22a634734fcc791ceef">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=13.404954&lat=52.5200066&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=dab583dbe54abce96110b043f0e9ae6e9e32237e3dae61407948d55d87698688" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=13.404954&lat=52.5200066&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=dab583dbe54abce96110b043f0e9ae6e9e32237e3dae61407948d55d87698688">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">68</td>
+            <td class="name">墨尔本<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">南半球代表</td>
+            <td class="lonlat" title="CSV原始值">144.96328</td>
+            <td class="lonlat" title="CSV原始值">-37.814107</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=-37.814107&lon=144.96328&key=c3e4fcf3aba698bcc87b3dc2de31531f" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=-37.814107&lon=144.96328&key=c3e4fcf3aba698bcc87b3dc2de31531f">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=144.96328&lat=-37.814107&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=24a8fae6e442aa6133a724f1803127121eb8e89328437ce01088e786969b8765" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=144.96328&lat=-37.814107&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=24a8fae6e442aa6133a724f1803127121eb8e89328437ce01088e786969b8765">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">69</td>
+            <td class="name">悉尼<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">南半球代表</td>
+            <td class="lonlat" title="CSV原始值">151.2069902</td>
+            <td class="lonlat" title="CSV原始值">-33.8674869</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=-33.8674869&lon=151.2069902&key=fc78f42ed876ed77d25e4cc64c1f859d" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=-33.8674869&lon=151.2069902&key=fc78f42ed876ed77d25e4cc64c1f859d">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=151.2069902&lat=-33.8674869&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=68bee6417f1ed22e5888d26e9955d202f6a86dfe8a8e432406208f3f6215a44d" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=151.2069902&lat=-33.8674869&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=68bee6417f1ed22e5888d26e9955d202f6a86dfe8a8e432406208f3f6215a44d">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">70</td>
+            <td class="name">纽约<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">北美核心城市</td>
+            <td class="lonlat" title="CSV原始值">-74.0059731</td>
+            <td class="lonlat" title="CSV原始值">40.7143528</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=40.7143528&lon=-74.0059731&key=c3ac6a48c32dde5f88f50137b5ba2eb1" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=40.7143528&lon=-74.0059731&key=c3ac6a48c32dde5f88f50137b5ba2eb1">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-74.0059731&lat=40.7143528&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=22cac6eb39053c5221245ea70ebb3d59e68a55b0553a5a525be57c2499fda755" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-74.0059731&lat=40.7143528&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=22cac6eb39053c5221245ea70ebb3d59e68a55b0553a5a525be57c2499fda755">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">71</td>
+            <td class="name">洛杉矶<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">北美沿海城市</td>
+            <td class="lonlat" title="CSV原始值">-118.2436849</td>
+            <td class="lonlat" title="CSV原始值">34.05404902</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.05404902&lon=-118.2436849&key=f12f7ddcbfb6bca45019b93d38e36993" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.05404902&lon=-118.2436849&key=f12f7ddcbfb6bca45019b93d38e36993">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-118.2436849&lat=34.05404902&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=5824472a5323753b88f8b5651ff5bad5c382433209bf3a0c42972b632b75421e" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-118.2436849&lat=34.05404902&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=5824472a5323753b88f8b5651ff5bad5c382433209bf3a0c42972b632b75421e">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">72</td>
+            <td class="name">多伦多<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">寒冷气候</td>
+            <td class="lonlat" title="CSV原始值">-79.3831843</td>
+            <td class="lonlat" title="CSV原始值">43.65543903</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=43.65543903&lon=-79.3831843&key=d38b0d6df873a8ef1791650aa82d5c7e" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=43.65543903&lon=-79.3831843&key=d38b0d6df873a8ef1791650aa82d5c7e">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-79.3831843&lat=43.65543903&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=dae5b87837c79194fcd57c5fcfb4fd32fe321af69c48e59d221dc05bb7213a8b" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-79.3831843&lat=43.65543903&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=dae5b87837c79194fcd57c5fcfb4fd32fe321af69c48e59d221dc05bb7213a8b">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">73</td>
+            <td class="name">雅加达<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">热带气候</td>
+            <td class="lonlat" title="CSV原始值">106.845599</td>
+            <td class="lonlat" title="CSV原始值">-6.204268787</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=-6.204268787&lon=106.845599&key=c0a907ac2eb58648dffa9befbbe4e4ac" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=-6.204268787&lon=106.845599&key=c0a907ac2eb58648dffa9befbbe4e4ac">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=106.845599&lat=-6.204268787&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=c790df73685922ae35f12f38ec658ed32f3673e3dae1788f3998f54d3900943d" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=106.845599&lat=-6.204268787&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=c790df73685922ae35f12f38ec658ed32f3673e3dae1788f3998f54d3900943d">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">74</td>
+            <td class="name">新加坡<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">国际化重点</td>
+            <td class="lonlat" title="CSV原始值">103.819836</td>
+            <td class="lonlat" title="CSV原始值">1.353444839</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=1.353444839&lon=103.819836&key=8cbdd98495c2493c403cefbe44c614fb" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=1.353444839&lon=103.819836&key=8cbdd98495c2493c403cefbe44c614fb">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=103.819836&lat=1.353444839&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=8568c9ac865f11e00cebf8cb610458a6d4e90edbf779d9de1eaf684fe6772d23" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=103.819836&lat=1.353444839&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=8568c9ac865f11e00cebf8cb610458a6d4e90edbf779d9de1eaf684fe6772d23">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">75</td>
+            <td class="name">曼谷<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">东南亚核心城市</td>
+            <td class="lonlat" title="CSV原始值">100.5241235</td>
+            <td class="lonlat" title="CSV原始值">13.74208608</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=13.74208608&lon=100.5241235&key=4d2f32e7b7219c07ad7bc18a80beea82" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=13.74208608&lon=100.5241235&key=4d2f32e7b7219c07ad7bc18a80beea82">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=100.5241235&lat=13.74208608&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=0f4808d86f621111fb57f048198417bb27ed9a1af66e8a225246aac9c341d976" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=100.5241235&lat=13.74208608&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=0f4808d86f621111fb57f048198417bb27ed9a1af66e8a225246aac9c341d976">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">76</td>
+            <td class="name">大阪<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">日本核心城市</td>
+            <td class="lonlat" title="CSV原始值">135.5021651</td>
+            <td class="lonlat" title="CSV原始值">34.70583331</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.70583331&lon=135.5021651&key=b20629c039e418e34489570583a52f54" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.70583331&lon=135.5021651&key=b20629c039e418e34489570583a52f54">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=135.5021651&lat=34.70583331&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=ccf2831a09d4b8dc5586f41dafe346acf48efd1f59e56ed401725beb68b168d5" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=135.5021651&lat=34.70583331&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=ccf2831a09d4b8dc5586f41dafe346acf48efd1f59e56ed401725beb68b168d5">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">77</td>
+            <td class="name">东京<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">日本核心城市</td>
+            <td class="lonlat" title="CSV原始值">139.6917064</td>
+            <td class="lonlat" title="CSV原始值">35.69950357</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=35.69950357&lon=139.6917064&key=d33ec776e2aaa565c5c745e6323f1db9" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=35.69950357&lon=139.6917064&key=d33ec776e2aaa565c5c745e6323f1db9">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=139.6917064&lat=35.69950357&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=07ef2cbc216db7964bf832b21eb2df4edf16b6e47a5d6bc78bf2695f3bd0a5f9" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=139.6917064&lat=35.69950357&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=07ef2cbc216db7964bf832b21eb2df4edf16b6e47a5d6bc78bf2695f3bd0a5f9">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">78</td>
+            <td class="name">吉隆坡<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">东南亚核心城市</td>
+            <td class="lonlat" title="CSV原始值">101.686855</td>
+            <td class="lonlat" title="CSV原始值">3.142674854</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=3.142674854&lon=101.686855&key=88802d7be6ab0b1085efa6337c1ce757" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=3.142674854&lon=101.686855&key=88802d7be6ab0b1085efa6337c1ce757">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=101.686855&lat=3.142674854&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=b3bbb2a43be08e626f0dc344a0137bcf636d4c3d6a06c42e1e43c17d8b2dab05" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=101.686855&lat=3.142674854&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=b3bbb2a43be08e626f0dc344a0137bcf636d4c3d6a06c42e1e43c17d8b2dab05">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">79</td>
+            <td class="name">釜山<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">韩国沿海城市</td>
+            <td class="lonlat" title="CSV原始值">129.0756416</td>
+            <td class="lonlat" title="CSV原始值">35.18964899</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=35.18964899&lon=129.0756416&key=829f714a79a9a12d06e63585bbdbc138" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=35.18964899&lon=129.0756416&key=829f714a79a9a12d06e63585bbdbc138">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=129.0756416&lat=35.18964899&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=593bf6619c30f049b5efdf7c69310285c828238b00f95a31794088e65d2f1653" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=129.0756416&lat=35.18964899&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=593bf6619c30f049b5efdf7c69310285c828238b00f95a31794088e65d2f1653">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">80</td>
+            <td class="name">首尔<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">韩国核心城市</td>
+            <td class="lonlat" title="CSV原始值">126.9779692</td>
+            <td class="lonlat" title="CSV原始值">37.58086833</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=37.58086833&lon=126.9779692&key=312292605beef9c3786e633c8e4d2d6e" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=37.58086833&lon=126.9779692&key=312292605beef9c3786e633c8e4d2d6e">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=126.9779692&lat=37.58086833&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=04cd7d5a13d8ad37c01af00a1799682fa507fc9e19b1d503337d1e96c5bace80" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=126.9779692&lat=37.58086833&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=04cd7d5a13d8ad37c01af00a1799682fa507fc9e19b1d503337d1e96c5bace80">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">81</td>
+            <td class="name">马尼拉<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">台风高发</td>
+            <td class="lonlat" title="CSV原始值">120.9842195</td>
+            <td class="lonlat" title="CSV原始值">14.6030649</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=14.6030649&lon=120.9842195&key=e21f1d9e786d18c751463fac80aec720" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=14.6030649&lon=120.9842195&key=e21f1d9e786d18c751463fac80aec720">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=120.9842195&lat=14.6030649&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=512c972466e23adfbdbd1988cde12a17833c27a479f3b67383f46284bb484092" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=120.9842195&lat=14.6030649&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=512c972466e23adfbdbd1988cde12a17833c27a479f3b67383f46284bb484092">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">82</td>
+            <td class="name">悉尼<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">南半球代表</td>
+            <td class="lonlat" title="CSV原始值">-60.18898769</td>
+            <td class="lonlat" title="CSV原始值">46.15149372</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=46.15149372&lon=-60.18898769&key=043385bfcde95a4228e57ccc82e26188" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=46.15149372&lon=-60.18898769&key=043385bfcde95a4228e57ccc82e26188">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-60.18898769&lat=46.15149372&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=ef2358fa06e040cc7965b9a4e24361e00ff22547eb431406e3ef25e941820137" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-60.18898769&lat=46.15149372&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=ef2358fa06e040cc7965b9a4e24361e00ff22547eb431406e3ef25e941820137">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">83</td>
+            <td class="name">胡志明市<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">热带气候</td>
+            <td class="lonlat" title="CSV原始值">106.6593417</td>
+            <td class="lonlat" title="CSV原始值">10.78723926</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=10.78723926&lon=106.6593417&key=f426b5a30aaf54a3341cc6f20b50339c" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=10.78723926&lon=106.6593417&key=f426b5a30aaf54a3341cc6f20b50339c">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=106.6593417&lat=10.78723926&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=0a5742439a0f9163e0e0b5e7f59b054c7a85053eb89b7dc35b1723310a9b6389" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=106.6593417&lat=10.78723926&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=0a5742439a0f9163e0e0b5e7f59b054c7a85053eb89b7dc35b1723310a9b6389">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">84</td>
+            <td class="name">洛杉矶县<span class="dup"></span></td>
+            <td class="cat">海外热门</td>
+            <td class="reason">北美沿海城市</td>
+            <td class="lonlat" title="CSV原始值">-118.2339204</td>
+            <td class="lonlat" title="CSV原始值">34.3329767</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.3329767&lon=-118.2339204&key=32529e4337e08006a921c2bc6e53c214" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=34.3329767&lon=-118.2339204&key=32529e4337e08006a921c2bc6e53c214">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-118.2339204&lat=34.3329767&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=d2f53fdd74f901ce4e830fe90a8aa18cb9c0a4d27401e331c3b29e753c3f9159" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=-118.2339204&lat=34.3329767&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=d2f53fdd74f901ce4e830fe90a8aa18cb9c0a4d27401e331c3b29e753c3f9159">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">85</td>
+            <td class="name">长沙县<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">华中代表</td>
+            <td class="lonlat" title="CSV原始值">113.08081</td>
+            <td class="lonlat" title="CSV原始值">28.24615</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=28.24615&lon=113.08081&key=160171d506e68b2b36a57efe3f83046c" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=28.24615&lon=113.08081&key=160171d506e68b2b36a57efe3f83046c">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.08081&lat=28.24615&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=f83474a45effc34e764033888fa148f1433b1942351a7c9d2788a2fef547e2ff" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=113.08081&lat=28.24615&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=f83474a45effc34e764033888fa148f1433b1942351a7c9d2788a2fef547e2ff">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">86</td>
+            <td class="name">乌鲁木齐县<span class="dup"></span></td>
+            <td class="cat">省会</td>
+            <td class="reason">干旱气候</td>
+            <td class="lonlat" title="CSV原始值">87.409417</td>
+            <td class="lonlat" title="CSV原始值">43.47136</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=43.47136&lon=87.409417&key=4cc68adaa2b36e40ac9df841e1c9d54f" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=43.47136&lon=87.409417&key=4cc68adaa2b36e40ac9df841e1c9d54f">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=87.409417&lat=43.47136&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=7b3934ffe3e08510d50ab31bf3def13912fbfcd9566aa41de441264c0bb8ce18" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=87.409417&lat=43.47136&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=7b3934ffe3e08510d50ab31bf3def13912fbfcd9566aa41de441264c0bb8ce18">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">87</td>
+            <td class="name">喀什市<span class="dup"></span></td>
+            <td class="cat">极端天气</td>
+            <td class="reason">干旱气候</td>
+            <td class="lonlat" title="CSV原始值">75.99379</td>
+            <td class="lonlat" title="CSV原始值">39.467686</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=39.467686&lon=75.99379&key=c124f234be0fa5c08249e084193204d5" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=39.467686&lon=75.99379&key=c124f234be0fa5c08249e084193204d5">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=75.99379&lat=39.467686&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=80b3b6b8323bba87496ddc10815df3f1ec5e8e7c0c5345f1f3904877dd098814" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=75.99379&lat=39.467686&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=80b3b6b8323bba87496ddc10815df3f1ec5e8e7c0c5345f1f3904877dd098814">复制</button>
+            </td>
+        </tr>
+        <tr>
+            <td class="idx">88</td>
+            <td class="name">阿勒泰市<span class="dup"></span></td>
+            <td class="cat">极端天气</td>
+            <td class="reason">冰雪场景</td>
+            <td class="lonlat" title="CSV原始值">88.131842</td>
+            <td class="lonlat" title="CSV原始值">47.827309</td>
+            <td class="url-cell">
+                <a href="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=47.827309&lon=88.131842&key=f8d5ebf7400d181892bc94c671ac889b" target="_blank" class="url-link cn">国内URL ↗</a>
+                <button class="copy-btn" data-url="http://coapi.moji.com/whapi/v2/weather?timestamp=0&token=cc920d85f8fbb762b6c705375add6c32&lat=47.827309&lon=88.131842&key=f8d5ebf7400d181892bc94c671ac889b">复制</button>
+            </td>
+            <td class="url-cell">
+                <a href="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=88.131842&lat=47.827309&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=a8d2dd487222f2e73d49bf480c027b48d77fb30afe5e9f5c9207533b64c4952a" target="_blank" class="url-link intl">国际URL ↗</a>
+                <button class="copy-btn" data-url="https://datasw1.api.moweather.com/whapi/in/weather?token=b88b7a5375e293671270016fe556a4b5&lon=88.131842&lat=47.827309&lang=zh-CN&city=1&current=1&nowcast=2&hourly=360&hHis=0&daily=15&aqi=1&aqiForecastHourly=72&alert=1&metric=true&ts=0&key=a8d2dd487222f2e73d49bf480c027b48d77fb30afe5e9f5c9207533b64c4952a">复制</button>
+            </td>
+        </tr>
+</tbody>
+</table>
+<p class="tip">💡 点击「国内URL / 国际URL」在新标签打开接口，点「复制」复制完整 URL。</p>
+<script>
+document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const url = btn.dataset.url;
+        navigator.clipboard.writeText(url).then(() => {
+            const old = btn.textContent;
+            btn.textContent = '已复制';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = old; btn.classList.remove('copied'); }, 1200);
+        });
+    });
+});
+</script>
+</body>
+</html>

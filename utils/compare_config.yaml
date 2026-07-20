@@ -1,0 +1,77 @@
+# 国内/国际天气数据一致性比对规则配置
+# 修改本文件即可调整比对口径, 无需改代码
+# 运行: python3 reformat_threshold.py
+
+# ===== 一致判定阈值 =====
+# 数值字段: |国内值 - 海外值| <= 阈值 算"一致", 否则"不一致"
+# weather类型: 中文文字完全相等算"一致"
+# 缺数据(国内或海外无值): 标"缺数据", 不计入一致率分母
+thresholds:
+  温度: 1          # ℃
+  体感温度: 1      # ℃
+  湿度: 5          # %
+  风速: 1          # m/s (海外已÷3.6换算)
+  气压: 1          # hPa
+  AQI: 10
+  # PM2.5 不比较
+
+# ===== 风速换算 =====
+# 国内风速单位 m/s, 海外 km/h, 海外值需 ÷divisor 换算成 m/s 再比对
+wind_convert:
+  enabled: true
+  divisor: 3.6
+
+# ===== 字段映射 =====
+# type: numeric(数值,按阈值) / wind(风速,需换算) / weather(天气现象,按文字)
+# multi: false=单值对象(current/aqi) / true=数组(hourly/daily,取limit条)
+# ts_key: 数组每条的时间标签字段; ts_label: 单值模块的时次标签
+# note: 备注说明(显示在明细备注列)
+modules:
+  实况:
+    source: current
+    multi: false
+    ts_label: 实况
+    fields:
+      温度: {cn: temp, intl: temp, type: numeric}
+      体感温度: {cn: real_feel, intl: rf, type: numeric}
+      湿度: {cn: humidity, intl: rh, type: numeric}
+      风速: {cn: wspd, intl: wspd, type: wind}
+      气压: {cn: mslp, intl: sp, type: numeric}
+      天气现象: {cn: weather, intl: wtr, type: weather}
+
+  24小时:
+    source: hourly
+    multi: true
+    limit: 24
+    ts_key: predict_time
+    fields:
+      温度: {cn: temp, intl: temp, type: numeric}
+      体感温度: {cn: real_feel, intl: rf, type: numeric}
+      湿度: {cn: humidity, intl: rh, type: numeric}
+      风速: {cn: wspd, intl: wspd, type: wind}
+      气压: {cn: mslp, intl: sp, type: numeric}
+      天气现象: {cn: weather, intl: wtr, type: weather}
+
+  15天:
+    source: daily
+    multi: true
+    limit: 16
+    ts_key: predict_date
+    fields:
+      温度(最高): {cn: temp_high, intl: temph, type: numeric}
+      温度(最低): {cn: temp_low, intl: templ, type: numeric}
+      体感温度(白天): {cn: realfeel_d, intl: rfd, type: numeric}
+      体感温度(夜间): {cn: realfeel_n, intl: rfn, type: numeric}
+      湿度: {cn: humidity, intl: rh, type: numeric}
+      风速(白天): {cn: wspd_day, intl: wspdd, type: wind}
+      风速(夜间): {cn: wspd_night, intl: wspdn, type: wind}
+      气压: {cn: mslp, intl: spd, type: numeric, note: 海外取白天spd}
+      天气现象(白天): {cn: weather_day, intl: wtrd, type: weather}
+      天气现象(夜间): {cn: weather_night, intl: wtrn, type: weather}
+
+  AQI模块:
+    source: aqi
+    multi: false
+    ts_label: AQI实况
+    fields:
+      AQI: {cn: aqi, intl: AQI, type: numeric}

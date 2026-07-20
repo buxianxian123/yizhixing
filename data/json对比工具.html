@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>国内/国际 JSON 对比工具</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+        margin: 0; padding: 0; background: #f0f2f5; color: #333;
+        font-size: 13px;
+    }
+    .toolbar {
+        background: #fff; padding: 10px 16px; border-bottom: 1px solid #e8e8e8;
+        position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    }
+    .toolbar h1 { font-size: 16px; margin: 0 0 8px 0; }
+    .input-row { display: flex; gap: 12px; margin-bottom: 8px; }
+    .input-box { flex: 1; display: flex; flex-direction: column; }
+    .input-box label { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+    .input-box.left label { color: #1890ff; }
+    .input-box.right label { color: #52c41a; }
+    textarea {
+        width: 100%; height: 120px; font-family: "SF Mono", Consolas, monospace;
+        font-size: 12px; padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;
+        resize: vertical;
+    }
+    .btn-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    button {
+        padding: 5px 14px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px;
+        cursor: pointer; font-size: 12px;
+    }
+    button:hover { background: #f0f0f0; }
+    button.primary { background: #1890ff; color: #fff; border-color: #1890ff; }
+    button.primary:hover { background: #40a9ff; }
+    .filter-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; font-size: 12px; }
+    .filter-row input[type=text] { padding: 4px 8px; border: 1px solid #d9d9d9; border-radius: 4px; width: 300px; }
+    .filter-row input[type=checkbox] { cursor: pointer; }
+    .stats { margin-left: auto; color: #666; }
+    .stats b { color: #d4380d; }
+
+    /* 树形渲染 */
+    .tree-container { display: flex; }
+    .tree {
+        flex: 1; padding: 12px; overflow: auto; max-height: calc(100vh - 220px);
+        background: #fff; margin: 8px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .tree.left { border-top: 3px solid #1890ff; }
+    .tree.right { border-top: 3px solid #52c41a; }
+    .node { padding-left: 20px; position: relative; }
+    .node-row {
+        display: flex; align-items: baseline; padding: 2px 4px; border-radius: 3px;
+        white-space: nowrap;
+    }
+    .node-row:hover { background: #f5f5f5; }
+    .toggle {
+        display: inline-block; width: 16px; cursor: pointer; user-select: none;
+        color: #999; text-align: center;
+    }
+    .toggle.collapsed::before { content: "▶"; }
+    .toggle.expanded::before { content: "▼"; }
+    .toggle.leaf { visibility: hidden; }
+    .children { }
+    .children.hidden { display: none; }
+
+    .key { color: #0451a5; font-weight: 500; margin-right: 6px; }
+    .val { font-family: "SF Mono", Consolas, monospace; }
+    .val.string { color: #a31515; }
+    .val.number { color: #098658; }
+    .val.boolean { color: #0000ff; }
+    .val.null { color: #808080; }
+    .val.missing { color: #bbb; font-style: italic; }
+
+    /* 差异高亮 */
+    .node-row.diff-different { background: #fff0f0; }
+    .node-row.diff-different:hover { background: #ffe0e0; }
+    .node-row.diff-missing-left { background: #fffbe6; }
+    .node-row.diff-missing-right { background: #fffbe6; }
+    .node-row.diff-typemismatch { background: #f9f0ff; }
+
+    .badge {
+        font-size: 10px; padding: 1px 6px; border-radius: 8px; margin-left: 8px;
+        font-weight: 600;
+    }
+    .badge.different { background: #ffccc7; color: #d4380d; }
+    .badge.missing-left { background: #fff1b8; color: #d48806; }
+    .badge.missing-right { background: #fff1b8; color: #d48806; }
+    .badge.typemismatch { background: #efdbff; color: #531dab; }
+
+    .empty-msg { color: #999; padding: 20px; text-align: center; }
+    .hint { color: #999; font-size: 11px; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+    <h1>国内 / 国际 JSON 对比工具</h1>
+    <div class="input-row">
+        <div class="input-box left">
+            <label>🇨🇳 国内接口 JSON（粘贴到这里）</label>
+            <textarea id="jsonLeft" placeholder='{"city":{},"condition":{"temp":25,...}}'></textarea>
+        </div>
+        <div class="input-box right">
+            <label>🌍 国际接口 JSON（粘贴到这里）</label>
+            <textarea id="jsonRight" placeholder='{"city":{},"current":{"temp":26,...}}'></textarea>
+        </div>
+    </div>
+    <div class="btn-row">
+        <button class="primary" onclick="runCompare()">🔍 开始对比</button>
+        <button onclick="expandAll()">展开全部</button>
+        <button onclick="collapseAll()">折叠全部</button>
+        <button onclick="expandDiffOnly()">只展开差异路径</button>
+        <button onclick="clearAll()">清空</button>
+    </div>
+    <div class="filter-row">
+        <span>关注字段:</span>
+        <input type="text" id="focusFields" placeholder="逗号分隔，如: temp,humidity,aqi (只高亮这些字段差异)">
+        <label><input type="checkbox" id="onlyDiff" onchange="applyFilter()"> 只看差异</label>
+        <label><input type="checkbox" id="ignoreCase" checked> 忽略大小写</label>
+        <span class="stats" id="stats"></span>
+    </div>
+    <div class="hint">💡 两边 JSON 结构可不同，按字段路径对齐对比。绿条=缺失，红条=值不同，紫条=类型不同。</div>
+</div>
+
+<div class="tree-container">
+    <div class="tree left" id="treeLeft"><div class="empty-msg">粘贴 JSON 后点「开始对比」</div></div>
+    <div class="tree right" id="treeRight"><div class="empty-msg">粘贴 JSON 后点「开始对比」</div></div>
+</div>
+
+<script>
+let lastDiffs = [];  // 存储差异路径，供过滤用
+
+// ===== JSON 解析 =====
+function parseJSON(text) {
+    text = text.trim();
+    if (!text) return { __empty: true };
+    try { return JSON.parse(text); }
+    catch (e) { return { __error: e.message }; }
+}
+
+// ===== 值类型判断 =====
+function typeOf(v) {
+    if (v === null) return 'null';
+    if (Array.isArray(v)) return 'array';
+    return typeof v;
+}
+function isLeaf(v) {
+    return v === null || (typeof v !== 'object');
+}
+
+// ===== 状态判断 =====
+// 'same' | 'different' | 'missing-left' | 'missing-right' | 'typemismatch'
+function getStatus(left, right, ignoreCase) {
+    const lNull = (left === undefined || left === null || left === null);
+    const rNull = (right === undefined || right === null);
+
+    if (left === undefined) return 'missing-left';
+    if (right === undefined) return 'missing-right';
+
+    const tl = typeOf(left), tr = typeOf(right);
+    if (tl !== tr) return 'typemismatch';
+
+    if (isLeaf(left)) {
+        // 基本类型比较
+        let a = left, b = right;
+        if (ignoreCase && typeof a === 'string' && typeof b === 'string') {
+            a = a.toLowerCase(); b = b.toLowerCase();
+        }
+        return a === b ? 'same' : 'different';
+    }
+    // 对象/数组：状态由子节点决定（渲染时不显示 badge，由子节点体现）
+    return 'container';
+}
+
+// ===== 收集所有差异路径 =====
+function collectDiffs(left, right, path, diffs, ignoreCase) {
+    const status = getStatus(left, right, ignoreCase);
+    if (status === 'different' || status === 'typemismatch') {
+        diffs.push({ path: path.slice(), status });
+        return;
+    }
+    if (status === 'missing-left' || status === 'missing-right') {
+        diffs.push({ path: path.slice(), status });
+        return;
+    }
+    if (status === 'same') return;
+    // container: 递归子节点
+    if (left === undefined || right === undefined) return;
+    const keysL = Array.isArray(left) ? left.map((_, i) => i) : Object.keys(left);
+    const keysR = Array.isArray(right) ? right.map((_, i) => i) : Object.keys(right);
+    const allKeys = [...new Set([...keysL.map(String), ...keysR.map(String)])];
+    for (const k of allKeys) {
+        const vl = Array.isArray(left) ? left[Number(k)] : (left ? left[k] : undefined);
+        const vr = Array.isArray(right) ? right[Number(k)] : (right ? right[k] : undefined);
+        collectDiffs(vl, vr, [...path, k], diffs, ignoreCase);
+    }
+}
+
+// 判断某路径下是否包含差异（用于决定容器节点高亮）
+function pathHasDiff(pathStr, diffs) {
+    return diffs.some(d => d.path.join('.') === pathStr || d.path.join('.').startsWith(pathStr + '.'));
+}
+
+// ===== 渲染节点 =====
+// side: 'left' | 'right'
+function renderNode(key, leftVal, rightVal, path, diffs, side, ignoreCase) {
+    const pathStr = path.join('.');
+    const div = document.createElement('div');
+    div.className = 'node';
+    div.dataset.path = pathStr;
+
+    const row = document.createElement('div');
+    row.className = 'node-row';
+
+    // 当前这边的值
+    const val = (side === 'left') ? leftVal : rightVal;
+    const otherVal = (side === 'left') ? rightVal : leftVal;
+    const hasVal = (val !== undefined);
+
+    // 状态（基于两边）
+    let status;
+    if (side === 'left') {
+        status = getStatus(leftVal, rightVal, ignoreCase);
+    } else {
+        // 右边视角：missing 反过来
+        status = getStatus(leftVal, rightVal, ignoreCase);
+        if (status === 'missing-left') status = 'missing-left'; // 右边有，左边缺
+        if (status === 'missing-right') status = 'missing-right';
+    }
+
+    // 折叠箭头
+    const toggle = document.createElement('span');
+    toggle.className = 'toggle';
+
+    // 判断是否是容器（对象/数组）
+    const isContainer = hasVal && !isLeaf(val);
+
+    if (isContainer) {
+        toggle.classList.add('expanded');
+        toggle.onclick = function() {
+            const child = div.querySelector(':scope > .children');
+            if (child) {
+                child.classList.toggle('hidden');
+                toggle.classList.toggle('expanded');
+                toggle.classList.toggle('collapsed');
+            }
+        };
+    } else {
+        toggle.classList.add('leaf');
+    }
+    row.appendChild(toggle);
+
+    // key
+    const keyEl = document.createElement('span');
+    keyEl.className = 'key';
+    keyEl.textContent = key + ':';
+    row.appendChild(keyEl);
+
+    if (isContainer) {
+        // 显示 {...} 或 [...]
+        const summary = document.createElement('span');
+        summary.className = 'val';
+        summary.style.color = '#999';
+        const childCount = Array.isArray(val) ? val.length : Object.keys(val).length;
+        summary.textContent = Array.isArray(val) ? `[${childCount}]` : `{${childCount}}`;
+        row.appendChild(summary);
+
+        // 容器差异 badge（子树有差异才显示）
+        const subHasDiff = pathHasDiff(pathStr, diffs);
+        if (subHasDiff) {
+            row.classList.add('diff-different');
+        }
+        // 缺失一边的容器，另一边正常显示但标注
+        if (status === 'missing-left' || status === 'missing-right') {
+            row.classList.add(status === 'missing-left' ? 'diff-missing-left' : 'diff-missing-right');
+            const badge = document.createElement('span');
+            badge.className = 'badge ' + (status === 'missing-left' ? 'missing-left' : 'missing-right');
+            badge.textContent = status === 'missing-left' ? '国际缺' : '国内缺';
+            row.appendChild(badge);
+        }
+    } else {
+        // 叶子节点：显示值
+        const valEl = document.createElement('span');
+        valEl.className = 'val ' + (hasVal ? typeOf(val) : 'missing');
+        if (hasVal) {
+            valEl.textContent = formatVal(val);
+        } else {
+            valEl.textContent = '— (缺失)';
+            valEl.classList.add('missing');
+        }
+        row.appendChild(valEl);
+
+        // 状态高亮 + badge
+        if (status === 'different') {
+            row.classList.add('diff-different');
+            const badge = document.createElement('span');
+            badge.className = 'badge different';
+            badge.textContent = '不同';
+            row.appendChild(badge);
+        } else if (status === 'typemismatch') {
+            row.classList.add('diff-typemismatch');
+            const badge = document.createElement('span');
+            badge.className = 'badge typemismatch';
+            badge.textContent = '类型不同';
+            row.appendChild(badge);
+        } else if (status === 'missing-left') {
+            row.classList.add('diff-missing-left');
+            const badge = document.createElement('span');
+            badge.className = 'badge missing-left';
+            badge.textContent = '国际缺';
+            row.appendChild(badge);
+        } else if (status === 'missing-right') {
+            row.classList.add('diff-missing-right');
+            const badge = document.createElement('span');
+            badge.className = 'badge missing-right';
+            badge.textContent = '国内缺';
+            row.appendChild(badge);
+        }
+    }
+
+    div.appendChild(row);
+
+    // 递归子节点
+    if (isContainer) {
+        const childContainer = document.createElement('div');
+        childContainer.className = 'children';
+        const keysL = Array.isArray(val) ? val.map((_, i) => i) : Object.keys(val);
+        // 用另一边的 key 补全（保证两边结构对齐显示）
+        let otherKeys = [];
+        if (otherVal !== undefined && otherVal !== null && !isLeaf(otherVal)) {
+            otherKeys = Array.isArray(otherVal) ? otherVal.map((_, i) => i) : Object.keys(otherVal);
+        }
+        const allKeys = [...new Set([...keysL.map(String), ...otherKeys.map(String)])];
+        for (const k of allKeys) {
+            const vl = Array.isArray(leftVal) ? leftVal[Number(k)] : (leftVal ? leftVal[k] : undefined);
+            const vr = Array.isArray(rightVal) ? rightVal[Number(k)] : (rightVal ? rightVal[k] : undefined);
+            // 当前 side 用对应的值
+            const childLeft = vl, childRight = vr;
+            childContainer.appendChild(renderNode(k, childLeft, childRight, [...path, k], diffs, side, ignoreCase));
+        }
+        div.appendChild(childContainer);
+    }
+
+    return div;
+}
+
+function formatVal(v) {
+    if (typeof v === 'string') return '"' + v + '"';
+    if (v === null) return 'null';
+    return String(v);
+}
+
+// ===== 主对比 =====
+function runCompare() {
+    const leftRaw = document.getElementById('jsonLeft').value;
+    const rightRaw = document.getElementById('jsonRight').value;
+    const ignoreCase = document.getElementById('ignoreCase').checked;
+
+    const left = parseJSON(leftRaw);
+    const right = parseJSON(rightRaw);
+
+    const treeLeft = document.getElementById('treeLeft');
+    const treeRight = document.getElementById('treeRight');
+    treeLeft.innerHTML = '';
+    treeRight.innerHTML = '';
+
+    // 错误处理
+    if (left.__error) { treeLeft.innerHTML = '<div class="empty-msg" style="color:#d4380d">❌ JSON 解析错误: ' + left.__error + '</div>'; }
+    if (right.__error) { treeRight.innerHTML = '<div class="empty-msg" style="color:#d4380d">❌ JSON 解析错误: ' + right.__error + '</div>'; }
+    if (left.__empty || left.__error || right.__empty || right.__error) {
+        if (!left.__error && !left.__empty) {}
+        else return;
+    }
+
+    // 收集差异
+    const diffs = [];
+    collectDiffs(left, right, [], diffs, ignoreCase);
+    lastDiffs = diffs;
+
+    // 渲染两边
+    const rootKey = 'root';
+    treeLeft.appendChild(renderNode(rootKey, left, right, [], diffs, 'left', ignoreCase));
+    treeRight.appendChild(renderNode(rootKey, left, right, [], diffs, 'right', ignoreCase));
+
+    // 统计
+    const stats = document.getElementById('stats');
+    const cnt = { different: 0, 'missing-left': 0, 'missing-right': 0, typemismatch: 0 };
+    diffs.forEach(d => { cnt[d.status] = (cnt[d.status] || 0) + 1; });
+    const total = diffs.length;
+    stats.innerHTML = `差异 <b>${total}</b> 个 (值不同 <b>${cnt.different}</b> | 国内缺 <b>${cnt['missing-right']}</b> | 国际缺 <b>${cnt['missing-left']}</b> | 类型不同 <b>${cnt.typemismatch}</b>)`;
+
+    applyFilter();
+}
+
+// ===== 展开/折叠 =====
+function expandAll() {
+    document.querySelectorAll('.toggle.collapsed').forEach(t => t.click());
+    document.querySelectorAll('.children.hidden').forEach(c => {
+        c.classList.remove('hidden');
+        const toggle = c.parentElement.querySelector(':scope > .node-row > .toggle');
+        if (toggle) { toggle.classList.remove('collapsed'); toggle.classList.add('expanded'); }
+    });
+}
+function collapseAll() {
+    document.querySelectorAll('.node > .children').forEach(c => {
+        const toggle = c.parentElement.querySelector(':scope > .node-row > .toggle');
+        if (toggle && toggle.classList.contains('expanded') && !toggle.classList.contains('leaf')) {
+            c.classList.add('hidden');
+            toggle.classList.remove('expanded');
+            toggle.classList.add('collapsed');
+        }
+    });
+}
+
+// 只展开差异路径：折叠全部，再展开差异所在路径
+function expandDiffOnly() {
+    collapseAll();
+    const diffPaths = new Set();
+    lastDiffs.forEach(d => {
+        // 把差异路径的所有祖先路径都展开
+        for (let i = 1; i <= d.path.length; i++) {
+            diffPaths.add(d.path.slice(0, i).join('.'));
+        }
+    });
+    diffPaths.forEach(p => {
+        const node = document.querySelector(`.node[data-path="${CSS.escape(p)}"]`);
+        if (node) {
+            const child = node.querySelector(':scope > .children');
+            const toggle = node.querySelector(':scope > .node-row > .toggle');
+            if (child && child.classList.contains('hidden')) {
+                child.classList.remove('hidden');
+                if (toggle) { toggle.classList.remove('collapsed'); toggle.classList.add('expanded'); }
+            }
+        }
+    });
+}
+
+// ===== 过滤 =====
+function applyFilter() {
+    const onlyDiff = document.getElementById('onlyDiff').checked;
+    const focusStr = document.getElementById('focusFields').value.trim();
+    const focusFields = focusStr ? focusStr.split(',').map(s => s.trim().toLowerCase()).filter(Boolean) : [];
+
+    // 遍历所有叶子行
+    document.querySelectorAll('.node-row').forEach(row => {
+        const node = row.parentElement;
+        const path = node.dataset.path || '';
+        const lastKey = path.split('.').pop().toLowerCase();
+
+        let show = true;
+        if (onlyDiff) {
+            // 只显示有差异标记的行
+            show = row.classList.contains('diff-different') ||
+                   row.classList.contains('diff-missing-left') ||
+                   row.classList.contains('diff-missing-right') ||
+                   row.classList.contains('diff-typemismatch');
+        }
+        if (focusFields.length > 0) {
+            // 关注字段：只高亮（淡化非关注）
+            const isFocus = focusFields.some(f => lastKey.includes(f));
+            if (isFocus) {
+                row.style.opacity = '1';
+                row.style.fontWeight = '700';
+            } else if (onlyDiff) {
+                // 只看差异模式下，非关注字段如果也不在差异里就隐藏
+                const isDiff = row.classList.contains('diff-different') ||
+                               row.classList.contains('diff-missing-left') ||
+                               row.classList.contains('diff-missing-right') ||
+                               row.classList.contains('diff-typemismatch');
+                show = isDiff && isFocus;
+            } else {
+                row.style.opacity = '0.4';
+                row.style.fontWeight = 'normal';
+            }
+        } else {
+            row.style.opacity = '';
+            row.style.fontWeight = '';
+        }
+        row.parentElement.style.display = show ? '' : 'none';
+    });
+}
+
+function clearAll() {
+    document.getElementById('jsonLeft').value = '';
+    document.getElementById('jsonRight').value = '';
+    document.getElementById('treeLeft').innerHTML = '<div class="empty-msg">粘贴 JSON 后点「开始对比」</div>';
+    document.getElementById('treeRight').innerHTML = '<div class="empty-msg">粘贴 JSON 后点「开始对比」</div>';
+    document.getElementById('stats').innerHTML = '';
+    lastDiffs = [];
+}
+
+// 快捷键: Ctrl+Enter 对比
+document.getElementById('jsonRight').addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') runCompare();
+});
+document.getElementById('jsonLeft').addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') runCompare();
+});
+</script>
+</body>
+</html>
