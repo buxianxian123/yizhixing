@@ -10,7 +10,7 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE = os.path.join(SCRIPT_DIR, '..', 'data', '墨迹国际化与国内版本天气数据一致性测试')
+BASE = os.path.join(SCRIPT_DIR, '..', 'data')
 JSON_DIR = os.path.join(BASE, '比对结果', '原始JSON')
 XLSX = os.path.join(BASE, '比对结果', '一致性比对报告_阈值口径.xlsx')
 CONFIG_PATH = os.path.join(SCRIPT_DIR, 'compare_config.yaml')

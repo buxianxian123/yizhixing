@@ -5,8 +5,8 @@ import hashlib,subprocess,json,csv,glob,os,time
 PASSWORD_CN='49ff9a4e5e8bd5e8ce9e057c5adc5d2d'
 TOKEN_CN='cc920d85f8fbb762b6c705375add6c32'
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-CSV_PATH = os.path.join(SCRIPT_DIR, '..', 'data', '墨迹国际化与国内版本天气数据一致性测试', '天气一致性测试城市_热门城市筛选.csv')
-JSON_DIR = os.path.join(SCRIPT_DIR, '..', 'data', '墨迹国际化与国内版本天气数据一致性测试', '比对结果', '原始JSON')
+CSV_PATH = os.path.join(SCRIPT_DIR, '..', 'data', '天气一致性测试城市_热门城市筛选.csv')
+JSON_DIR = os.path.join(SCRIPT_DIR, '..', 'data', '比对结果', '原始JSON')
 def cn_key(lat,lon): return hashlib.md5((PASSWORD_CN+'0'+lat+lon).encode()).hexdigest()
 def fetch(url,retry=2):
     for _ in range(retry+1):

@@ -6,8 +6,8 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-JSON_DIR = os.path.join(SCRIPT_DIR, '..', 'data', '墨迹国际化与国内版本天气数据一致性测试', '比对结果', '原始JSON')
-XLSX = os.path.join(SCRIPT_DIR, '..', 'data', '墨迹国际化与国内版本天气数据一致性测试', '比对结果', '一致性比对报告.xlsx')
+JSON_DIR = os.path.join(SCRIPT_DIR, '..', 'data', '比对结果', '原始JSON')
+XLSX = os.path.join(SCRIPT_DIR, '..', 'data', '比对结果', '一致性比对报告.xlsx')
 
 def num(v):
     if v is None: return None

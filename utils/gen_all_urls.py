@@ -46,8 +46,8 @@ FIELD_DICT_IN = {
 }
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-CSV_PATH = os.path.join(SCRIPT_DIR, '..', 'data', '墨迹国际化与国内版本天气数据一致性测试', '天气一致性测试城市_热门城市筛选.csv')
-OUTPUT_HTML = os.path.join(SCRIPT_DIR, '..', 'data', '墨迹国际化与国内版本天气数据一致性测试', '城市URL列表.html')
+CSV_PATH = os.path.join(SCRIPT_DIR, '..', 'data', '天气一致性测试城市_热门城市筛选.csv')
+OUTPUT_HTML = os.path.join(SCRIPT_DIR, '..', 'data', '城市URL列表.html')
 # =====================================
 
 
