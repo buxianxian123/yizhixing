@@ -68,7 +68,7 @@ def get_in_key(lat, lon, timestamp='0'):
 
 def gen_cn_url(lat, lon):
     key = get_cn_key(lat, lon, TIMESTAMP_CN)
-    return f'{BASE_URL_CN}?timestamp={TIMESTAMP_CN}&token={TOKEN_CN}&lat={lat}&lon={lon}&key={key}'
+    return f'{BASE_URL_CN}?timestamp={TIMESTAMP_CN}&language=zh-CN&token={TOKEN_CN}&lat={lat}&lon={lon}&key={key}'
 
 
 def gen_in_url(lat, lon):
