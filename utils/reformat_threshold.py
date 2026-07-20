@@ -135,7 +135,7 @@ def main():
     ws2=wb.create_sheet('总结')
     from collections import defaultdict
     # stat key: (field, module, period)
-    stat=defaultdict(lambda:{'total':0,'miss':0,'n':0,'ok':0,'maxdiff':0,'maxcity':''})
+    stat=defaultdict(lambda:{'total':0,'miss':0,'n':0,'ok':0,'sumdiff':0,'maxdiff':0,'maxcity':''})
     for p in allP:
         city,module,field,ts,cnv,iv,diff,ok,note,period=p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]
         s=stat[(field,module,period)]; s['total']+=1
@@ -143,8 +143,10 @@ def main():
             s['miss']+=1; continue
         s['n']+=1
         if ok=='一致': s['ok']+=1
-        if isinstance(diff,(int,float)) and abs(diff)>abs(s['maxdiff']): s['maxdiff']=diff; s['maxcity']=city
-    H2=['字段','模块','时效','总数据','缺数据(已排除)','有效样本','一致数','一致率','最大偏差','最大偏差城市']
+        if isinstance(diff,(int,float)):
+            s['sumdiff']+=abs(diff)
+            if abs(diff)>abs(s['maxdiff']): s['maxdiff']=diff; s['maxcity']=city
+    H2=['字段','模块','时效','总数据','缺数据(已排除)','有效样本','一致数','一致率','平均偏差','最大偏差','最大偏差城市']
     ws2.append(H2)
     for c in range(1,len(H2)+1): ws2.cell(row=1,column=c).font=Font(bold=True)
     PERIOD_ORDER = {p[0]: i for i, p in enumerate(PERIODS_24H)}
@@ -152,8 +154,9 @@ def main():
         for (field,m,period),s in sorted(stat.items(), key=lambda x: (x[0][1], list(MODULES.keys()).index(x[0][1]) if x[0][1] in MODULES else 99, x[0][0], PERIOD_ORDER.get(x[0][2], 99))):
             if m!=module: continue
             rate=f"{s['ok']/s['n']*100:.1f}%" if s['n'] else '0'
-            ws2.append([field,m,period,s['total'],s['miss'],s['n'],s['ok'],rate,s['maxdiff'],s['maxcity']])
-    for col,w in zip('ABCDEFGHIJ',[16,10,14,8,14,10,8,10,10,14]): ws2.column_dimensions[col].width=w
+            avgdiff=round(s['sumdiff']/s['n'],2) if s['n'] else ''
+            ws2.append([field,m,period,s['total'],s['miss'],s['n'],s['ok'],rate,avgdiff,s['maxdiff'],s['maxcity']])
+    for col,w in zip('ABCDEFGHIJK',[16,10,14,8,14,10,8,10,10,10,14]): ws2.column_dimensions[col].width=w
     ws2.freeze_panes='A2'
 
     # ============ Sheet3 说明 ============
