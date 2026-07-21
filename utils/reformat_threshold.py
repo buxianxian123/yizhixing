@@ -279,7 +279,7 @@ def gen_xlsx(allP, title, xlsx_path):
                 mismatch = [(p, c) for p, c in sorted_pairs if p[0] != p[1]]  # 排除一致的
                 # 平均偏差：最常见的误判对，只写一个
                 if mismatch:
-                    avg_display = f'{mismatch[0][0][0]}→{mismatch[0][0][1]}({mismatch[0][1]}次)'
+                    avg_display = f'国内{mismatch[0][0][0]}→国外{mismatch[0][0][1]}({mismatch[0][1]}次)'
                 else:
                     avg_display = round(s['sumdiff'] / s['n'], 2) if s['n'] else ''
                 # 最大偏差：按实际偏差等级算，找最高等级的常见误判对
@@ -294,7 +294,7 @@ def gen_xlsx(allP, title, xlsx_path):
                             best_pair = (cn_val, intl_val)
                             best_cnt = cnt
                     if best_pair:
-                        max_display = f'{best_pair[0]}→{best_pair[1]}({best_cnt}次)'
+                        max_display = f'国内{best_pair[0]}→国外{best_pair[1]}({best_cnt}次)'
                     else:
                         max_display = f'偏差{int(max_dev)}级 {s["dev_counts"][max_dev]}次'
                 else:
@@ -329,7 +329,7 @@ def gen_xlsx(allP, title, xlsx_path):
             for rank, (city, val) in enumerate(top_sorted, 1):
                 d, cn_val, intl_val = val
                 if cn_val and intl_val and '天气现象' in field:
-                    pair_str = f'{cn_val}→{intl_val}'
+                    pair_str = f'国内{cn_val}→国外{intl_val}'
                 else:
                     pair_str = ''
                 ws_top.append([m, field, period or '', rank, city, pair_str, round(d, 2)])
