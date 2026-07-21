@@ -237,7 +237,7 @@ def gen_xlsx(allP, title, xlsx_path):
 
     # ---------- Sheet2 总结 ----------
     ws2 = wb.create_sheet('总结')
-    stat = defaultdict(lambda: {'total': 0, 'miss': 0, 'n': 0, 'ok': 0, 'sumdiff': 0, 'maxdiff': 0, 'maxcity': '', 'top': []})
+    stat = defaultdict(lambda: {'total': 0, 'miss': 0, 'n': 0, 'ok': 0, 'sumdiff': 0, 'maxdiff': 0, 'maxcity': '', 'top': {}})
     for p in allP:
         city, module, field, _, _, _, diff, ok, _, period = p
         s = stat[(field, module, period)]
@@ -250,7 +250,8 @@ def gen_xlsx(allP, title, xlsx_path):
             s['sumdiff'] += abs(diff)
             if abs(diff) > abs(s['maxdiff']):
                 s['maxdiff'] = diff; s['maxcity'] = city
-            s['top'].append((city, diff))
+            if city not in s['top'] or abs(diff) > abs(s['top'][city]):
+                s['top'][city] = diff
 
     H2 = ['字段', '模块', '时效', '总数据', '缺数据(已排除)', '有效样本', '一致数', '一致率', '平均偏差', '最大偏差', '最大偏差城市']
     ws2.append(H2)
@@ -287,7 +288,7 @@ def gen_xlsx(allP, title, xlsx_path):
         ))
         for (field, m, period), s in items:
             if m != module: continue
-            top5 = sorted(s['top'], key=lambda x: abs(x[1]), reverse=True)[:5]
+            top5 = sorted(s['top'].items(), key=lambda x: abs(x[1]), reverse=True)[:5]
             for rank, (city, d) in enumerate(top5, 1):
                 ws_top.append([m, field, period or '', rank, city, round(d, 2)])
     for col, w in zip('ABCDEF', [10, 16, 14, 6, 16, 10]):
