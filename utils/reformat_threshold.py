@@ -106,14 +106,13 @@ def calc_weather_deviation(cn_text, intl_text):
     天气现象语义映射偏差计算（五分制评分 → 偏差值）
     将中文天气文字映射到(大类,量级,高影响标记)，按评分规则打分
 
-    评分规则：
-      5分 同大类+同量级          → 偏差0  完全一致  ✅ 一致
-      4分 同大类+量级差=1        → 偏差1  轻微量级偏差 ❌ 不一致
-      3分 不同大类+均非高影响    → 偏差2  主天气不一致
-      2分 同大类+量级差≥2+非高影 → 偏差3  明显量级偏差
-      1分 涉及高影响+同大类      → 偏差4  高影响偏差
-      0分 高影响+不同大类        → 偏差5  高影响漏报/错判
-    一致判定: score >= ok_min_score（默认5，即偏差=0）
+    评分规则（5=最佳 → 0=最差，仅5分算一致）：
+      5分  主天气一致+量级一致                     → 完全匹配
+      4分  主天气一致+量级差1级                     → 轻微量级偏差
+      3分  主天气不一致（晴↔多云等），均非高影响      → 主天气不一致
+      2分  主天气错判（量级差≥2），或降水vs非降水    → 明显偏差
+      1分  涉及高影响天气+同大类                   → 高影响偏差
+      0分  高影响天气+不同大类                     → 高影响漏报/错判
 
     返回 (偏差, '一致'/'不一致')
     """
@@ -148,7 +147,12 @@ def calc_weather_deviation(cn_text, intl_text):
         if a['hi'] or b['hi']:
             score = WEATHER_MAP['score_hi_diff_cat']
         else:
-            score = WEATHER_MAP['score_diff_cat_no_hi']
+            # 一方雨/雪一方非降水 → 比纯云量差异更严重
+            is_precip = lambda t: t['cat'] in ('雨', '雪')
+            if is_precip(a) != is_precip(b):
+                score = WEATHER_MAP.get('score_diff_cat_precip', 2)
+            else:
+                score = WEATHER_MAP['score_diff_cat_no_hi']
 
     deviation = ok_min - score
     ok = '一致' if score >= ok_min else '不一致'
@@ -294,14 +298,22 @@ def gen_xlsx(allP, title, xlsx_path):
                             best_pair = (cn_val, intl_val)
                             best_cnt = cnt
                     if best_pair:
-                        max_display = f'国内{best_pair[0]}→国外{best_pair[1]}({best_cnt}次)'
-                        # 若平均偏差和最大偏差显示同一对，尝试找第二个常见的
-                        if mismatch and avg_display == max_display:
-                            for (cn2, intl2), cnt2 in mismatch:
-                                d2, _ = calc_weather_deviation(cn2, intl2)
-                                if d2 == max_dev and (cn2, intl2) != best_pair:
-                                    max_display = f'国内{cn2}→国外{intl2}({cnt2}次)'
-                                    break
+                        # 优先找同等级偏差中涉及雨/雪的误判对，更有意义
+                        rain_pair = None
+                        rain_cnt = 0
+                        for (cn2, intl2), cnt2 in mismatch:
+                            if cnt2 <= rain_cnt: continue
+                            d2, _ = calc_weather_deviation(cn2, intl2)
+                            if d2 == max_dev:
+                                ta = WTH_TEXTS.get(cn2, {})
+                                tb = WTH_TEXTS.get(intl2, {})
+                                if ta.get('cat') in ('雨','雪') or tb.get('cat') in ('雨','雪'):
+                                    rain_pair = (cn2, intl2)
+                                    rain_cnt = cnt2
+                        if rain_pair:
+                            max_display = f'国内{rain_pair[0]}→国外{rain_pair[1]}({rain_cnt}次)'
+                        else:
+                            max_display = f'国内{best_pair[0]}→国外{best_pair[1]}({best_cnt}次)'
                     else:
                         max_display = f'偏差{int(max_dev)}级 {s["dev_counts"][max_dev]}次'
                 else:
@@ -367,12 +379,12 @@ def gen_xlsx(allP, title, xlsx_path):
     notes.append('五、天气现象语义映射比对规则（五分制评分）：')
     notes.append('  将国内外中文天气文字统一映射到(大类, 量级, 是否高影响)')
     notes.append('  评分→偏差规则:')
-    notes.append('    5分 同大类+同量级          → 偏差0  完全一致 ✅ (一致)')
-    notes.append('    4分 同大类+量级差=1        → 偏差1  轻微量级偏差')
-    notes.append('    3分 不同大类+均非高影响    → 偏差2  主天气不一致')
-    notes.append('    2分 同大类+量级差≥2+非高影 → 偏差3  明显量级偏差')
-    notes.append('    1分 涉及高影响+同大类      → 偏差4  高影响偏差')
-    notes.append('    0分 高影响+不同大类        → 偏差5  高影响漏报/错判')
+    notes.append('    5分 主天气一致+量级一致                     → 完全匹配')
+    notes.append('    4分 主天气一致+量级差1级                     → 轻微量级偏差')
+    notes.append('    3分 主天气不一致(晴↔多云等)，均非高影响       → 主天气不一致')
+    notes.append('    2分 主天气错判(量级差≥2)，或降水vs非降水     → 明显偏差')
+    notes.append('    1分 涉及高影响天气+同大类                   → 高影响偏差')
+    notes.append('    0分 高影响天气+不同大类                     → 高影响漏报/错判')
     notes.append('  一致判定: 仅5分(偏差=0)算"一致"，其余全算"不一致"')
     notes.append('  高影响天气: 大雨/暴雨/大暴雨/特大暴雨/大雪/暴雪/雷暴/冰雹')
     notes.append('  完整映射对照表请见 compare_config.yaml → weather_mapping')
