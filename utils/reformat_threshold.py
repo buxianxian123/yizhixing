@@ -275,25 +275,24 @@ def gen_xlsx(allP, title, xlsx_path):
 
             # 天气现象字段：显示最频繁的 CN→INTL 误判对
             if '天气现象' in field and s['pair_counts']:
-                # 按次数降序排列
                 sorted_pairs = sorted(s['pair_counts'].items(), key=lambda x: -x[1])
-                # 平均偏差：最多误判对（排除完全一致的）
-                mismatch = [(p, c) for p, c in sorted_pairs if p[0] != p[1]]
+                mismatch = [(p, c) for p, c in sorted_pairs if p[0] != p[1]]  # 排除一致的
+                # 平均偏差：最常见的误判对，只写一个
                 if mismatch:
-                    top_m = mismatch[0]
-                    avg_display = f'{top_m[0][0]}→{top_m[0][1]}({top_m[1]}次)'
-                    if len(mismatch) > 1:
-                        avg_display += f' {mismatch[1][0][0]}→{mismatch[1][0][1]}({mismatch[1][1]}次)'
+                    avg_display = f'{mismatch[0][0][0]}→{mismatch[0][0][1]}({mismatch[0][1]}次)'
                 else:
                     avg_display = round(s['sumdiff'] / s['n'], 2) if s['n'] else ''
-                # 最大偏差：频次最高的偏差等级描述
-                if s['dev_counts']:
-                    max_dev = max(s['dev_counts'].keys(), key=lambda k: abs(k))
-                    cnt = s['dev_counts'][max_dev]
-                    labels = {5: '高影响漏报', 4: '高影响偏差', 3: '明显量级偏差', 2: '主天气不一致', 1: '轻微量级偏差', 0: '完全一致'}
-                    max_display = f'{labels.get(max_dev, "偏差"+str(max_dev))} {cnt}次'
+                # 最大偏差：最常见的涉及高影响天气的误判对
+                hi_pairs = [(p, c) for p, c in mismatch
+                            if WTH_TEXTS.get(p[0], {}).get('hi') or WTH_TEXTS.get(p[1], {}).get('hi')]
+                if hi_pairs:
+                    pair, cnt = hi_pairs[0]  # pair=(cn, intl), cnt=次数
+                    cn_val, intl_val = pair
+                    hi_type = cn_val if WTH_TEXTS.get(cn_val, {}).get('hi') else intl_val
+                    max_display = f'漏报{hi_type}({cnt}次)'
                 else:
-                    max_display = s['maxdiff']
+                    max_dev = max(s['dev_counts'].keys(), key=lambda k: abs(k))
+                    max_display = f'偏差{max_dev}级 {s["dev_counts"][max_dev]}次' if s['dev_counts'] else s['maxdiff']
             else:
                 avg_display = round(s['sumdiff'] / s['n'], 2) if s['n'] else ''
                 max_display = s['maxdiff']
