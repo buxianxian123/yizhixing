@@ -295,6 +295,13 @@ def gen_xlsx(allP, title, xlsx_path):
                             best_cnt = cnt
                     if best_pair:
                         max_display = f'国内{best_pair[0]}→国外{best_pair[1]}({best_cnt}次)'
+                        # 若平均偏差和最大偏差显示同一对，尝试找第二个常见的
+                        if mismatch and avg_display == max_display:
+                            for (cn2, intl2), cnt2 in mismatch:
+                                d2, _ = calc_weather_deviation(cn2, intl2)
+                                if d2 == max_dev and (cn2, intl2) != best_pair:
+                                    max_display = f'国内{cn2}→国外{intl2}({cnt2}次)'
+                                    break
                     else:
                         max_display = f'偏差{int(max_dev)}级 {s["dev_counts"][max_dev]}次'
                 else:
