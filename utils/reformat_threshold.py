@@ -282,17 +282,23 @@ def gen_xlsx(allP, title, xlsx_path):
                     avg_display = f'{mismatch[0][0][0]}→{mismatch[0][0][1]}({mismatch[0][1]}次)'
                 else:
                     avg_display = round(s['sumdiff'] / s['n'], 2) if s['n'] else ''
-                # 最大偏差：最常见的涉及高影响天气的误判对
-                hi_pairs = [(p, c) for p, c in mismatch
-                            if WTH_TEXTS.get(p[0], {}).get('hi') or WTH_TEXTS.get(p[1], {}).get('hi')]
-                if hi_pairs:
-                    pair, cnt = hi_pairs[0]  # pair=(cn, intl), cnt=次数
-                    cn_val, intl_val = pair
-                    hi_type = cn_val if WTH_TEXTS.get(cn_val, {}).get('hi') else intl_val
-                    max_display = f'漏报{hi_type}({cnt}次)'
+                # 最大偏差：按实际偏差等级算，找最高等级的常见误判对
+                max_dev = max(s['dev_counts'].keys(), key=lambda k: abs(k)) if s['dev_counts'] else None
+                if max_dev and max_dev >= 1:
+                    # 逐一算每个误判对的偏差值，找到等于 max_dev 的
+                    best_pair = None
+                    best_cnt = 0
+                    for (cn_val, intl_val), cnt in mismatch:
+                        dev, _ = calc_weather_deviation(cn_val, intl_val)
+                        if dev == max_dev and cnt > best_cnt:
+                            best_pair = (cn_val, intl_val)
+                            best_cnt = cnt
+                    if best_pair:
+                        max_display = f'{best_pair[0]}→{best_pair[1]}({best_cnt}次)'
+                    else:
+                        max_display = f'偏差{int(max_dev)}级 {s["dev_counts"][max_dev]}次'
                 else:
-                    max_dev = max(s['dev_counts'].keys(), key=lambda k: abs(k))
-                    max_display = f'偏差{max_dev}级 {s["dev_counts"][max_dev]}次' if s['dev_counts'] else s['maxdiff']
+                    max_display = s['maxdiff']
             else:
                 avg_display = round(s['sumdiff'] / s['n'], 2) if s['n'] else ''
                 max_display = s['maxdiff']
