@@ -39,15 +39,13 @@ weather_mapping:
     晴:         {cat: 晴, level: 0, hi: false}
     大部晴朗:   {cat: 晴, level: 0, hi: false}       # 晴的衍生
 
-    # ============ 云系 ============
-    少云:       {cat: 晴, level: 0, hi: false}       # 晴占主导
+    # ============ 阴天系（多云/阴/雾/霾 归为一类，均为非降水天气）============
+    少云:       {cat: 晴, level: 0, hi: false}       # 晴占主导，少云≈晴
     多云:       {cat: 多云, level: 0, hi: false}
-    阴:         {cat: 阴, level: 0, hi: false}
-
-    # ============ 雾、霾、霜 ============
-    雾:         {cat: 雾, level: 0, hi: false}
-    冻雾:       {cat: 雾, level: 0, hi: false}       # 雾的衍生
-    霾:         {cat: 霾, level: 0, hi: false}
+    阴:         {cat: 多云, level: 0, hi: false}      # 阴≈多云，只是云量区别
+    雾:         {cat: 多云, level: 0, hi: false}      # 雾≈阴天，API分类差异大
+    冻雾:       {cat: 多云, level: 0, hi: false}      # 雾的衍生
+    霾:         {cat: 多云, level: 0, hi: false}      # 霾≈阴天有污染
     霜:         {cat: 霜, level: 0, hi: false}
 
     # ============ 冻雨 ============
@@ -83,9 +81,10 @@ weather_mapping:
     暴雪:       {cat: 雪, level: 5, hi: true}        # 高影响
 
     # ============ 雷暴/雷电 ============
-    雷阵雨:     {cat: 雷暴, level: 0, hi: true}      # 高影响
-    雷阵雨伴有冰雹: {cat: 雷暴, level: 0, hi: true} # 高影响
-    雷电:       {cat: 雷暴, level: 0, hi: true}      # 高影响
+    # 雷阵雨：有雷的雨，本质是降水，降为雨大类（level=2 同小雨/阵雨）
+    雷阵雨:     {cat: 雨, level: 2, hi: false}
+    雷阵雨伴有冰雹: {cat: 雷暴, level: 0, hi: true} # 带冰雹是真严重，保留高影响
+    雷电:       {cat: 雷暴, level: 0, hi: true}      # 高影响（纯雷电无降水）
     雷暴:       {cat: 雷暴, level: 0, hi: true}      # 高影响
 
     # ============ 冰雹（含冰衍生）============

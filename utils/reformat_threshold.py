@@ -22,6 +22,7 @@ BASE = os.path.join(SCRIPT_DIR, '..', 'data')
 CITY_CSV = os.path.join(BASE, '天气一致性测试城市_热门城市筛选.csv')
 OUT_DIR = os.path.join(BASE, '比对结果')
 TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%H%M')
+CITY_RANK = {}  # 城市序号，偏差相同时偏远地区优先
 CSV_PATH = os.path.join(OUT_DIR, f'数据明细_{TIMESTAMP}.csv')
 XLSX_STRICT = os.path.join(OUT_DIR, f'一致性比对报告_严格相等_{TIMESTAMP}.xlsx')
 XLSX_THRESHOLD = os.path.join(OUT_DIR, f'一致性比对报告_阈值口径_{TIMESTAMP}.xlsx')
@@ -237,9 +238,9 @@ def gen_xlsx(allP, title, xlsx_path):
 
     # ---------- Sheet2 总结 ----------
     ws2 = wb.create_sheet('总结')
-    stat = defaultdict(lambda: {'total': 0, 'miss': 0, 'n': 0, 'ok': 0, 'sumdiff': 0, 'maxdiff': 0, 'maxcity': '', 'top': {}})
+    stat = defaultdict(lambda: {'total': 0, 'miss': 0, 'n': 0, 'ok': 0, 'sumdiff': 0, 'maxdiff': 0, 'maxcity': '', 'top': {}, 'dev_counts': defaultdict(int), 'pair_counts': defaultdict(int)})
     for p in allP:
-        city, module, field, _, _, _, diff, ok, _, period = p
+        city, module, field, ts, cnv, iv, diff, ok, note, period = p
         s = stat[(field, module, period)]
         s['total'] += 1
         if ok in ('缺数据', ''):
@@ -250,8 +251,12 @@ def gen_xlsx(allP, title, xlsx_path):
             s['sumdiff'] += abs(diff)
             if abs(diff) > abs(s['maxdiff']):
                 s['maxdiff'] = diff; s['maxcity'] = city
-            if city not in s['top'] or abs(diff) > abs(s['top'][city]):
-                s['top'][city] = diff
+            if city not in s['top'] or abs(diff) > abs(s['top'][city][0]):
+                s['top'][city] = (diff, str(cnv or ''), str(iv or ''))
+            s['dev_counts'][int(diff)] += 1
+        # 天气现象字段：统计 CN→INTL 配对频次
+        if '天气现象' in field and cnv is not None and iv is not None:
+            s['pair_counts'][(str(cnv), str(iv))] += 1
 
     H2 = ['字段', '模块', '时效', '总数据', '缺数据(已排除)', '有效样本', '一致数', '一致率', '平均偏差', '最大偏差', '最大偏差城市']
     ws2.append(H2)
@@ -267,15 +272,40 @@ def gen_xlsx(allP, title, xlsx_path):
         for (field, m, period), s in items:
             if m != module: continue
             rate = f"{s['ok']/s['n']*100:.1f}%" if s['n'] else '0'
-            avgdiff = round(s['sumdiff'] / s['n'], 2) if s['n'] else ''
-            ws2.append([field, m, period, s['total'], s['miss'], s['n'], s['ok'], rate, avgdiff, s['maxdiff'], s['maxcity']])
+
+            # 天气现象字段：显示最频繁的 CN→INTL 误判对
+            if '天气现象' in field and s['pair_counts']:
+                # 按次数降序排列
+                sorted_pairs = sorted(s['pair_counts'].items(), key=lambda x: -x[1])
+                # 平均偏差：最多误判对（排除完全一致的）
+                mismatch = [(p, c) for p, c in sorted_pairs if p[0] != p[1]]
+                if mismatch:
+                    top_m = mismatch[0]
+                    avg_display = f'{top_m[0][0]}→{top_m[0][1]}({top_m[1]}次)'
+                    if len(mismatch) > 1:
+                        avg_display += f' {mismatch[1][0][0]}→{mismatch[1][0][1]}({mismatch[1][1]}次)'
+                else:
+                    avg_display = round(s['sumdiff'] / s['n'], 2) if s['n'] else ''
+                # 最大偏差：频次最高的偏差等级描述
+                if s['dev_counts']:
+                    max_dev = max(s['dev_counts'].keys(), key=lambda k: abs(k))
+                    cnt = s['dev_counts'][max_dev]
+                    labels = {5: '高影响漏报', 4: '高影响偏差', 3: '明显量级偏差', 2: '主天气不一致', 1: '轻微量级偏差', 0: '完全一致'}
+                    max_display = f'{labels.get(max_dev, "偏差"+str(max_dev))} {cnt}次'
+                else:
+                    max_display = s['maxdiff']
+            else:
+                avg_display = round(s['sumdiff'] / s['n'], 2) if s['n'] else ''
+                max_display = s['maxdiff']
+
+            ws2.append([field, m, period, s['total'], s['miss'], s['n'], s['ok'], rate, avg_display, max_display, s['maxcity']])
     for col, w in zip('ABCDEFGHIJK', [16, 10, 14, 8, 14, 10, 8, 10, 10, 10, 14]):
         ws2.column_dimensions[col].width = w
     ws2.freeze_panes = 'A2'
 
     # ---------- Sheet 前五偏差城市 ----------
     ws_top = wb.create_sheet('前五偏差城市')
-    H3 = ['模块', '字段', '时效', '排名', '城市', '偏差']
+    H3 = ['模块', '字段', '时效', '排名', '城市', 'CN→INTL', '偏差']
     ws_top.append(H3)
     for c in range(1, len(H3) + 1):
         ws_top.cell(row=1, column=c).font = Font(bold=True)
@@ -288,10 +318,17 @@ def gen_xlsx(allP, title, xlsx_path):
         ))
         for (field, m, period), s in items:
             if m != module: continue
-            top5 = sorted(s['top'].items(), key=lambda x: abs(x[1]), reverse=True)[:5]
-            for rank, (city, d) in enumerate(top5, 1):
-                ws_top.append([m, field, period or '', rank, city, round(d, 2)])
-    for col, w in zip('ABCDEF', [10, 16, 14, 6, 16, 10]):
+            top_items = list(s['top'].items())
+            top_sorted = sorted(top_items, key=lambda x: (-abs(x[1][0]), -CITY_RANK.get(x[0], 9999)))[:5]
+
+            for rank, (city, val) in enumerate(top_sorted, 1):
+                d, cn_val, intl_val = val
+                if cn_val and intl_val and '天气现象' in field:
+                    pair_str = f'{cn_val}→{intl_val}'
+                else:
+                    pair_str = ''
+                ws_top.append([m, field, period or '', rank, city, pair_str, round(d, 2)])
+    for col, w in zip('ABCDEFG', [10, 16, 14, 6, 14, 16, 10]):
         ws_top.column_dimensions[col].width = w
     ws_top.freeze_panes = 'A2'
 
@@ -355,6 +392,10 @@ def main():
             cities.append((r['Fcityname_cn'].strip(), lon, lat))
 
     print(f"共 {len(cities)} 个城市, 开始请求实时 API...")
+
+    # 城市序号：CSV 顺序（北京、天津、上海...漠河、阿勒泰），偏差相同时偏远地区优先
+    global CITY_RANK
+    CITY_RANK = {name: i for i, (name, *_rest) in enumerate(cities)}
 
     # 2. 逐个城市拉数据 + 比对
     allP_strict = []
