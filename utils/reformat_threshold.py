@@ -260,7 +260,10 @@ def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
         if ok == '一致': s['ok'] += 1
         if isinstance(diff, (int, float)):
             s['sumdiff'] += abs(diff)
-            if abs(diff) > abs(s['maxdiff']):
+            # 最大偏差城市: 偏差更大则替换; 偏差相同(并列)取更偏远的城市
+            # (和「前五偏差城市」口径一致, 避免并列时被 CSV 顺序靠前的北京占位)
+            if abs(diff) > abs(s['maxdiff']) or \
+               (abs(diff) == abs(s['maxdiff']) and CITY_RANK.get(city, 9999) > CITY_RANK.get(s['maxcity'], 9999)):
                 s['maxdiff'] = diff; s['maxcity'] = city
             if city not in s['top'] or abs(diff) > abs(s['top'][city][0]):
                 s['top'][city] = (diff, str(cnv or ''), str(iv or ''))
