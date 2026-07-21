@@ -72,6 +72,12 @@ def fetch(url, retry=2):
         time.sleep(0.5)
     return None
 
+def fetch_city(name, lon, lat):
+    """拉单个城市的国内+国际数据，任一失败对应项为 None。供一次性脚本和定时脚本复用"""
+    cn_data = fetch(cn_url(lat, lon))
+    in_data = fetch(in_url_full(lat, lon))
+    return cn_data, in_data
+
 # =========================================================
 # 第二部分：比对工具函数
 # =========================================================
@@ -216,8 +222,9 @@ def build_points(city, cn, ind, strict=False):
 # 第三部分：生成 xlsx
 # =========================================================
 
-def gen_xlsx(allP, title, xlsx_path):
-    """生成一致性比对报告 xlsx"""
+def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
+    """生成一致性比对报告 xlsx
+    extra_notes: 可选，追加到「说明」sheet 末尾的额外说明（如均值报告的采样信息），默认 None 不追加"""
 
     # ---------- Sheet1 数据明细 ----------
     wb = openpyxl.Workbook()
@@ -392,6 +399,10 @@ def gen_xlsx(allP, title, xlsx_path):
     notes.append('注: 修改 compare_config.yaml 后重跑即可更新阈值口径')
     for n in notes:
         ws3.append([n])
+    if extra_notes:
+        ws3.append([''])
+        for n in extra_notes:
+            ws3.append([n])
     ws3['A1'].font = Font(bold=True, size=13)
 
     wb.save(xlsx_path)
@@ -401,10 +412,10 @@ def gen_xlsx(allP, title, xlsx_path):
 # 主流程
 # =========================================================
 
-def main():
-    os.makedirs(OUT_DIR, exist_ok=True)
-
-    # 1. 读城市列表（去重）
+def load_cities():
+    """读城市列表（去重），并设置 CITY_RANK（CSV 顺序，偏差相同时偏远地区优先）。
+    返回 [(name, lon, lat), ...]。供一次性脚本和定时脚本复用"""
+    global CITY_RANK
     cities = []
     seen = set()
     with open(CITY_CSV, 'r', encoding='utf-8-sig') as f:
@@ -414,12 +425,16 @@ def main():
             if key in seen: continue
             seen.add(key)
             cities.append((r['Fcityname_cn'].strip(), lon, lat))
-
-    print(f"共 {len(cities)} 个城市, 开始请求实时 API...")
-
     # 城市序号：CSV 顺序（北京、天津、上海...漠河、阿勒泰），偏差相同时偏远地区优先
-    global CITY_RANK
     CITY_RANK = {name: i for i, (name, *_rest) in enumerate(cities)}
+    return cities
+
+def main():
+    os.makedirs(OUT_DIR, exist_ok=True)
+
+    # 1. 读城市列表（去重）+ 设置偏远优先序号
+    cities = load_cities()
+    print(f"共 {len(cities)} 个城市, 开始请求实时 API...")
 
     # 2. 逐个城市拉数据 + 比对
     allP_strict = []
@@ -427,8 +442,7 @@ def main():
     ok_count = 0
 
     for idx, (name, lon, lat) in enumerate(cities, 1):
-        cn_data = fetch(cn_url(lat, lon))
-        in_data = fetch(in_url_full(lat, lon))
+        cn_data, in_data = fetch_city(name, lon, lat)
 
         if cn_data is None:
             print(f"  [{idx}/{len(cities)}] ⏭️ {name} 国内接口失败, 跳过")

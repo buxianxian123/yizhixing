@@ -160,3 +160,12 @@ modules:
     ts_label: AQI实况
     fields:
       AQI: {cn: aqi, intl: AQI, type: numeric}
+
+# ===== 定时均值比对（scheduled_compare.py 用）=====
+# 每 interval_seconds 秒全量拉一次，攒满 avg_count 次后取平均、出一份均值报告
+# 数值字段取均值，天气现象取众数，再跑一次比对（报告格式与单次一致，只是数据更稳）
+# 改本段即可调窗口，无需改代码；运行: python3 scheduled_compare.py
+schedule:
+  interval_seconds: 600   # 拉取间隔（秒），600=每10分钟
+  avg_count: 6             # 攒满几次出一份平均报告
+  keep_raw: true           # 每次原始JSON落盘留底（true=留，false=不留省空间）
