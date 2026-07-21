@@ -19,10 +19,10 @@ TOKEN_IN = 'b88b7a5375e293671270016fe556a4b5'
 # ====== 路径配置 ======
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE = os.path.join(SCRIPT_DIR, '..', 'data')
-CSV_PATH = os.path.join(BASE, '天气一致性测试城市_热门城市筛选.csv')
+CITY_CSV = os.path.join(BASE, '天气一致性测试城市_热门城市筛选.csv')
 OUT_DIR = os.path.join(BASE, '比对结果')
 TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%H%M')
-JSON_DIR = os.path.join(OUT_DIR, f'原始JSON_{TIMESTAMP}')
+CSV_PATH = os.path.join(OUT_DIR, f'数据明细_{TIMESTAMP}.csv')
 XLSX_STRICT = os.path.join(OUT_DIR, f'一致性比对报告_严格相等_{TIMESTAMP}.xlsx')
 XLSX_THRESHOLD = os.path.join(OUT_DIR, f'一致性比对报告_阈值口径_{TIMESTAMP}.xlsx')
 CONFIG_PATH = os.path.join(SCRIPT_DIR, 'compare_config.yaml')
@@ -32,6 +32,8 @@ config = yaml.safe_load(open(CONFIG_PATH, encoding='utf-8'))
 THRESHOLDS = config['thresholds']
 WIND_CFG = config['wind_convert']
 MODULES = config['modules']
+WEATHER_MAP = config.get('weather_mapping', {})
+WTH_TEXTS = WEATHER_MAP.get('texts', {})
 
 # ====== 24小时时效分段 ======
 PERIODS_24H = [
@@ -98,6 +100,59 @@ def get_period_label(source, idx):
         if start <= idx < end: return label
     return ''
 
+def calc_weather_deviation(cn_text, intl_text):
+    """
+    天气现象语义映射偏差计算（五分制评分 → 偏差值）
+    将中文天气文字映射到(大类,量级,高影响标记)，按评分规则打分
+
+    评分规则：
+      5分 同大类+同量级          → 偏差0  完全一致  ✅ 一致
+      4分 同大类+量级差=1        → 偏差1  轻微量级偏差 ❌ 不一致
+      3分 不同大类+均非高影响    → 偏差2  主天气不一致
+      2分 同大类+量级差≥2+非高影 → 偏差3  明显量级偏差
+      1分 涉及高影响+同大类      → 偏差4  高影响偏差
+      0分 高影响+不同大类        → 偏差5  高影响漏报/错判
+    一致判定: score >= ok_min_score（默认5，即偏差=0）
+
+    返回 (偏差, '一致'/'不一致')
+    """
+    if cn_text is None or intl_text is None:
+        return (None, '')
+
+    a = WTH_TEXTS.get(cn_text)
+    b = WTH_TEXTS.get(intl_text)
+    ok_min = WEATHER_MAP.get('ok_min_score', 5)
+
+    # 未识别的天气文字 → 回退到文字比对
+    if a is None or b is None:
+        ok = '一致' if str(cn_text) == str(intl_text) else '不一致'
+        score = ok_min if ok == '一致' else 3
+        deviation = ok_min - score
+        return (deviation, ok)
+
+    level_diff = abs(a['level'] - b['level'])
+
+    if a['cat'] == b['cat']:
+        if level_diff == 0:
+            score = WEATHER_MAP['score_same_cat_same_level']
+        elif level_diff == 1:
+            score = WEATHER_MAP['score_same_cat_level_diff_1']
+        else:
+            # level_diff >= 2
+            if a['hi'] or b['hi']:
+                score = WEATHER_MAP['score_hi_same_cat']
+            else:
+                score = WEATHER_MAP['score_same_cat_level_diff_ge2']
+    else:
+        if a['hi'] or b['hi']:
+            score = WEATHER_MAP['score_hi_diff_cat']
+        else:
+            score = WEATHER_MAP['score_diff_cat_no_hi']
+
+    deviation = ok_min - score
+    ok = '一致' if score >= ok_min else '不一致'
+    return (deviation, ok)
+
 def cmp_point(city, module, field, ts, cnv, iv, spec, period='', strict=False):
     """
     单个数据点比对
@@ -116,8 +171,8 @@ def cmp_point(city, module, field, ts, cnv, iv, spec, period='', strict=False):
         cv = num(cnv); iv_conv = num(iv)
 
     if typ == 'weather':
-        ok = text_diff(cv, iv_conv)
-        return (city, module, field, ts, cnv, iv, '', ok, note or '按中文文字比对', period)
+        diff, ok = calc_weather_deviation(cnv, iv)
+        return (city, module, field, ts, cnv, iv, diff, ok, '按语义映射比对', period)
 
     if cv is None or iv_conv is None:
         return (city, module, field, ts, cnv, iv, '', '缺数据', note, period)
@@ -182,7 +237,7 @@ def gen_xlsx(allP, title, xlsx_path):
 
     # ---------- Sheet2 总结 ----------
     ws2 = wb.create_sheet('总结')
-    stat = defaultdict(lambda: {'total': 0, 'miss': 0, 'n': 0, 'ok': 0, 'sumdiff': 0, 'maxdiff': 0, 'maxcity': ''})
+    stat = defaultdict(lambda: {'total': 0, 'miss': 0, 'n': 0, 'ok': 0, 'sumdiff': 0, 'maxdiff': 0, 'maxcity': '', 'top': []})
     for p in allP:
         city, module, field, _, _, _, diff, ok, _, period = p
         s = stat[(field, module, period)]
@@ -195,6 +250,7 @@ def gen_xlsx(allP, title, xlsx_path):
             s['sumdiff'] += abs(diff)
             if abs(diff) > abs(s['maxdiff']):
                 s['maxdiff'] = diff; s['maxcity'] = city
+            s['top'].append((city, diff))
 
     H2 = ['字段', '模块', '时效', '总数据', '缺数据(已排除)', '有效样本', '一致数', '一致率', '平均偏差', '最大偏差', '最大偏差城市']
     ws2.append(H2)
@@ -216,6 +272,28 @@ def gen_xlsx(allP, title, xlsx_path):
         ws2.column_dimensions[col].width = w
     ws2.freeze_panes = 'A2'
 
+    # ---------- Sheet 前五偏差城市 ----------
+    ws_top = wb.create_sheet('前五偏差城市')
+    H3 = ['模块', '字段', '时效', '排名', '城市', '偏差']
+    ws_top.append(H3)
+    for c in range(1, len(H3) + 1):
+        ws_top.cell(row=1, column=c).font = Font(bold=True)
+    PERIOD_ORDER_T = {p[0]: i for i, p in enumerate(PERIODS_24H)}
+    for module in MODULES.keys():
+        items = sorted(stat.items(), key=lambda x: (
+            list(MODULES.keys()).index(x[0][1]) if x[0][1] in MODULES else 99,
+            x[0][0],
+            PERIOD_ORDER_T.get(x[0][2], 99)
+        ))
+        for (field, m, period), s in items:
+            if m != module: continue
+            top5 = sorted(s['top'], key=lambda x: abs(x[1]), reverse=True)[:5]
+            for rank, (city, d) in enumerate(top5, 1):
+                ws_top.append([m, field, period or '', rank, city, round(d, 2)])
+    for col, w in zip('ABCDEF', [10, 16, 14, 6, 16, 10]):
+        ws_top.column_dimensions[col].width = w
+    ws_top.freeze_panes = 'A2'
+
     # ---------- Sheet3 说明 ----------
     ws3 = wb.create_sheet('说明')
     notes = [f'一致性比对报告 — {title}', '', f'配置文件: compare_config.yaml', '']
@@ -226,7 +304,7 @@ def gen_xlsx(allP, title, xlsx_path):
         notes.append('一、一致判定阈值(来自配置):')
         for k, v in THRESHOLDS.items():
             notes.append(f'  {k} |差|≤{v}')
-        notes.append('  天气现象 中文文字完全一致')
+        notes.append('  天气现象 按语义映射比对(详见天气映射说明)')
         notes.append('  缺数据 标"缺数据",不计入一致率分母')
         notes.append('')
     notes.append('二、风速换算(来自配置):')
@@ -235,6 +313,19 @@ def gen_xlsx(allP, title, xlsx_path):
     notes.append('三、24小时时效分段: 短时效(1-6h) / 中时效(7-12h) / 长时效(13-24h)')
     notes.append('')
     notes.append('四、时次对齐: 24h按predict_time, 15天按predict_date')
+    notes.append('')
+    notes.append('五、天气现象语义映射比对规则（五分制评分）：')
+    notes.append('  将国内外中文天气文字统一映射到(大类, 量级, 是否高影响)')
+    notes.append('  评分→偏差规则:')
+    notes.append('    5分 同大类+同量级          → 偏差0  完全一致 ✅ (一致)')
+    notes.append('    4分 同大类+量级差=1        → 偏差1  轻微量级偏差')
+    notes.append('    3分 不同大类+均非高影响    → 偏差2  主天气不一致')
+    notes.append('    2分 同大类+量级差≥2+非高影 → 偏差3  明显量级偏差')
+    notes.append('    1分 涉及高影响+同大类      → 偏差4  高影响偏差')
+    notes.append('    0分 高影响+不同大类        → 偏差5  高影响漏报/错判')
+    notes.append('  一致判定: 仅5分(偏差=0)算"一致"，其余全算"不一致"')
+    notes.append('  高影响天气: 大雨/暴雨/大暴雨/特大暴雨/大雪/暴雪/雷暴/冰雹')
+    notes.append('  完整映射对照表请见 compare_config.yaml → weather_mapping')
     notes.append('')
     notes.append('注: 修改 compare_config.yaml 后重跑即可更新阈值口径')
     for n in notes:
@@ -249,13 +340,12 @@ def gen_xlsx(allP, title, xlsx_path):
 # =========================================================
 
 def main():
-    os.makedirs(JSON_DIR, exist_ok=True)
     os.makedirs(OUT_DIR, exist_ok=True)
 
     # 1. 读城市列表（去重）
     cities = []
     seen = set()
-    with open(CSV_PATH, 'r', encoding='utf-8-sig') as f:
+    with open(CITY_CSV, 'r', encoding='utf-8-sig') as f:
         for r in csv.DictReader(f):
             lon = r['Flon'].strip(); lat = r['Flat'].strip()
             key = (lon, lat)
@@ -281,12 +371,6 @@ def main():
             print(f"  [{idx}/{len(cities)}] ⏭️ {name} 国际接口失败, 跳过")
             continue
 
-        # 保存原始JSON（带时间戳，供历史回溯用）
-        with open(f'{JSON_DIR}/{name}_国内.json', 'w', encoding='utf-8') as f:
-            json.dump(cn_data, f, ensure_ascii=False)
-        with open(f'{JSON_DIR}/{name}_国际.json', 'w', encoding='utf-8') as f:
-            json.dump(in_data, f, ensure_ascii=False)
-
         # 同时构建两种口径的比对数据
         allP_strict += build_points(name, cn_data, in_data, strict=True)
         allP_threshold += build_points(name, cn_data, in_data, strict=False)
@@ -311,7 +395,16 @@ def main():
     print(f"✅ 阈值口径报告: {XLSX_THRESHOLD}")
     print(f"   数据点: {n2}")
 
-    # 5. 快速打印阈值口径一致率
+    # 5. 导出数据明细CSV（替代原始JSON作为证据，长格式）
+    with open(CSV_PATH, 'w', encoding='utf-8-sig', newline='') as f:
+        w = csv.writer(f)
+        w.writerow(['城市', '模块', '字段', '时次', '国内值', '海外值', '差异', '是否一致', '备注', '时效分段'])
+        for p in allP_threshold:
+            w.writerow(p)
+    print(f"✅ 数据明细CSV: {CSV_PATH}")
+    print(f"   数据点: {len(allP_threshold)}")
+
+    # 6. 快速打印阈值口径一致率
     print(f"\n{'='*60}")
     print(f"阈值口径 — 各字段一致率速览")
     print(f"{'='*60}")

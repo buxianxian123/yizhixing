@@ -15,6 +15,91 @@ thresholds:
   AQI: 10
   # PM2.5 不比较
 
+# ===== 天气现象语义映射（完整版 44+29 种）=====
+# 把国内外中文天气文字统一映射到(大类, 量级, 是否高影响)
+#
+# 评分规则（5=最佳 → 0=最差）：
+#   5分  同大类+同量级           → 偏差0  完全一致
+#   4分  同大类+量级差=1         → 偏差1  轻微量级偏差
+#   3分  不同大类+均非高影响     → 偏差2  主天气不一致
+#   2分  同大类+量级差≥2+非高影  → 偏差3  明显量级偏差
+#   1分  涉及高影响+同大类       → 偏差4  高影响偏差
+#   0分  高影响+不同大类         → 偏差5  高影响漏报/错判
+# 一致判定: score≥5（偏差=0）
+weather_mapping:
+  score_same_cat_same_level: 5
+  score_same_cat_level_diff_1: 4
+  score_diff_cat_no_hi: 3
+  score_same_cat_level_diff_ge2: 2
+  score_hi_same_cat: 1
+  score_hi_diff_cat: 0
+  ok_min_score: 5
+  texts:
+    # ============ 晴 / 无云系 ============
+    晴:         {cat: 晴, level: 0, hi: false}
+    大部晴朗:   {cat: 晴, level: 0, hi: false}       # 晴的衍生
+
+    # ============ 云系 ============
+    少云:       {cat: 晴, level: 0, hi: false}       # 晴占主导
+    多云:       {cat: 多云, level: 0, hi: false}
+    阴:         {cat: 阴, level: 0, hi: false}
+
+    # ============ 雾、霾、霜 ============
+    雾:         {cat: 雾, level: 0, hi: false}
+    冻雾:       {cat: 雾, level: 0, hi: false}       # 雾的衍生
+    霾:         {cat: 霾, level: 0, hi: false}
+    霜:         {cat: 霜, level: 0, hi: false}
+
+    # ============ 冻雨 ============
+    冻雨:       {cat: 冻雨, level: 0, hi: false}
+
+    # ============ 雨系列（按强度递增）============
+    零星小雨:   {cat: 雨, level: 1, hi: false}
+    小阵雨:     {cat: 雨, level: 1, hi: false}       # 比小雨还轻
+    雨:         {cat: 雨, level: 1, hi: false}       # 泛指雨
+    小雨:       {cat: 雨, level: 2, hi: false}
+    小到中雨:   {cat: 雨, level: 2, hi: false}       # 按小雨算
+    阵雨:       {cat: 雨, level: 2, hi: false}
+    局部阵雨:   {cat: 雨, level: 2, hi: false}
+    中雨:       {cat: 雨, level: 3, hi: false}
+    中到大雨:   {cat: 雨, level: 3, hi: false}       # 按中雨算
+    强阵雨:     {cat: 雨, level: 3, hi: false}       # 同中雨级
+    大到暴雨:   {cat: 雨, level: 4, hi: true}        # 高影响 按大雨算
+    大雨:       {cat: 雨, level: 4, hi: true}        # 高影响
+    暴雨:       {cat: 雨, level: 5, hi: true}        # 高影响
+    大暴雨:     {cat: 雨, level: 6, hi: true}        # 高影响
+    特大暴雨:   {cat: 雨, level: 7, hi: true}        # 高影响
+
+    # ============ 雪系列（按强度递增）============
+    零星小雪:   {cat: 雪, level: 1, hi: false}
+    阵雪:       {cat: 雪, level: 1, hi: false}
+    小阵雪:     {cat: 雪, level: 1, hi: false}       # 比小雪还轻
+    雪:         {cat: 雪, level: 1, hi: false}       # 泛指雪
+    小雪:       {cat: 雪, level: 2, hi: false}
+    小到中雪:   {cat: 雪, level: 2, hi: false}       # 按小雪算
+    雨夹雪:     {cat: 雪, level: 2, hi: false}
+    中雪:       {cat: 雪, level: 3, hi: false}
+    大雪:       {cat: 雪, level: 4, hi: true}        # 高影响
+    暴雪:       {cat: 雪, level: 5, hi: true}        # 高影响
+
+    # ============ 雷暴/雷电 ============
+    雷阵雨:     {cat: 雷暴, level: 0, hi: true}      # 高影响
+    雷阵雨伴有冰雹: {cat: 雷暴, level: 0, hi: true} # 高影响
+    雷电:       {cat: 雷暴, level: 0, hi: true}      # 高影响
+    雷暴:       {cat: 雷暴, level: 0, hi: true}      # 高影响
+
+    # ============ 冰雹（含冰衍生）============
+    冰雹:       {cat: 冰雹, level: 0, hi: true}      # 高影响
+    冰针:       {cat: 冰雹, level: 0, hi: true}      # 冰的衍生
+    冰粒:       {cat: 冰雹, level: 0, hi: true}      # 冰的衍生
+
+    # ============ 沙尘系列 ============
+    浮尘:       {cat: 沙尘, level: 0, hi: false}
+    扬沙:       {cat: 沙尘, level: 0, hi: false}
+    尘卷风:     {cat: 沙尘, level: 0, hi: false}
+    沙尘暴:     {cat: 沙尘, level: 1, hi: false}
+    强沙尘暴:   {cat: 沙尘, level: 2, hi: false}
+
 # ===== 风速换算 =====
 # 国内风速单位 m/s, 海外 km/h, 海外值需 ÷divisor 换算成 m/s 再比对
 wind_convert:
