@@ -148,6 +148,13 @@ def emit_reports(acc, avg_count, window_start, window_end):
     if not strict_pts:
         print("❌ 无有效数据, 不生成报告")
         return
+    # 过滤掉不在当前城市列表的城市（CSV删城后，旧acc残留的城市不进报告）
+    valid_cities = set(c[0] for c in rt.load_cities())
+    before = len(threshold_pts)
+    threshold_pts = [p for p in threshold_pts if p[0] in valid_cities]
+    strict_pts = [p for p in strict_pts if p[0] in valid_cities]
+    if before != len(threshold_pts):
+        print(f"  过滤非城市列表数据: {before} -> {len(threshold_pts)}")
 
     tag = f'{avg_count}次均值_{window_start}-{window_end}'
     date = window_end[:8]

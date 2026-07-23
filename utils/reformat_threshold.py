@@ -222,6 +222,12 @@ def build_points(city, cn, ind, strict=False):
 # 第三部分：生成 xlsx
 # =========================================================
 
+def _weather_level_diff(cn_val, intl_val):
+    """天气现象误判的量级差(并列时细分严重度:特大暴雨>暴雨>大雨),非天气返回0"""
+    a = WTH_TEXTS.get(cn_val); b = WTH_TEXTS.get(intl_val)
+    if not a or not b: return 0
+    return abs(a['level'] - b['level'])
+
 def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
     """生成一致性比对报告 xlsx
     extra_notes: 可选，追加到「说明」sheet 末尾的额外说明（如均值报告的采样信息），默认 None 不追加"""
@@ -353,7 +359,11 @@ def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
         for (field, m, period), s in items:
             if m != module: continue
             top_items = list(s['top'].items())
-            top_sorted = sorted(top_items, key=lambda x: (-abs(x[1][0]), -CITY_RANK.get(x[0], 9999)))[:5]
+            top_sorted = sorted(top_items, key=lambda x: (
+                -abs(x[1][0]),
+                -_weather_level_diff(x[1][1], x[1][2]),
+                -CITY_RANK.get(x[0], 9999)
+            ))[:5]
 
             for rank, (city, val) in enumerate(top_sorted, 1):
                 d, cn_val, intl_val = val

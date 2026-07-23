@@ -38,11 +38,11 @@ CITY_REGION = {
     '杭州市': ['中国', '浙江'], '宁波市': ['中国', '浙江'], '温州市': ['中国', '浙江'],
     '合肥市': ['中国', '安徽'],
     '福州市': ['中国', '福建'], '厦门市': ['中国', '福建'],
-    '南昌市': ['中国', '江西'], '南昌县': ['中国', '江西'],
+    '南昌市': ['中国', '江西'],
     '青岛市': ['中国', '山东'], '济南市': ['中国', '山东'], '烟台市': ['中国', '山东'],
     '郑州市': ['中国', '河南'], '洛阳市': ['中国', '河南'],
     '武汉市': ['中国', '湖北'],
-    '长沙市': ['中国', '湖南'], '长沙县': ['中国', '湖南'],
+    '长沙市': ['中国', '湖南'],
     '广州市': ['中国', '广东'], '深圳市': ['中国', '广东'], '珠海市': ['中国', '广东'], '东莞市': ['中国', '广东'], '佛山市': ['中国', '广东'],
     '南宁市': ['中国', '广西'],
     '三亚市': ['中国', '海南'], '海口市': ['中国', '海南'],
@@ -54,7 +54,7 @@ CITY_REGION = {
     '兰州市': ['中国', '甘肃'], '敦煌市': ['中国', '甘肃'],
     '西宁市': ['中国', '青海'],
     '呼和浩特市': ['中国', '内蒙古'],
-    '乌鲁木齐市': ['中国', '新疆'], '乌鲁木齐县': ['中国', '新疆'], '喀什市': ['中国', '新疆'], '喀什地区': ['中国', '新疆'],
+    '乌鲁木齐市': ['中国', '新疆'], '喀什市': ['中国', '新疆'], '喀什地区': ['中国', '新疆'],
     '库尔勒市': ['中国', '新疆'], '吐鲁番地区': ['中国', '新疆'], '阿勒泰市': ['中国', '新疆'], '阿勒泰地区': ['中国', '新疆'],
     '香港特别行政区': ['中国', '香港'], '澳门特别行政区': ['中国', '澳门'], '台北市': ['中国', '台湾'],
     '吉隆坡': ['海外', '马来西亚'], '新加坡': ['海外', '新加坡'], '多伦多': ['海外', '加拿大'], '柏林': ['海外', '德国'], '洛杉矶县': ['海外', '美国'],
@@ -128,6 +128,16 @@ def read_thresholds():
         import yaml
         cfg = yaml.safe_load(open(CONFIG_PATH, encoding='utf-8'))
         return cfg.get('thresholds', {})
+    except Exception:
+        return {}
+
+
+def read_weather_texts():
+    """读天气现象语义映射(文字->{level,cat,hi})，供前端TOP5按量级差细分排序"""
+    try:
+        import yaml
+        cfg = yaml.safe_load(open(CONFIG_PATH, encoding='utf-8'))
+        return cfg.get('weather_mapping', {}).get('texts', {})
     except Exception:
         return {}
 
@@ -833,7 +843,13 @@ function drawModuleTop5(def, elId){
         cityBest[r[C]] = {r, score};
       }
     }
-    const sorted = Object.values(cityBest).sort((a,b)=>b.score-a.score).slice(0,5);
+    const WL=DATA.weatherTexts||{};
+    const wld=(cn,iv)=>{const a=WL[cn],b=WL[iv]; if(!a||!b) return 0; return Math.abs(a.level-b.level);};
+    const sorted = Object.values(cityBest).sort((a,b)=>{
+      const dd=b.score-a.score;
+      if(dd) return dd;
+      return wld(b.r[CN],b.r[IV]) - wld(a.r[CN],a.r[IV]);
+    }).slice(0,5);
     const tds = sorted.map((item, idx)=>{
       const r = item.r;
       const d = num(r[DF]);
@@ -1107,6 +1123,7 @@ def main():
         'detail': detail,
         'region': CITY_REGION,
         'thresholds': thresholds,
+        'weatherTexts': read_weather_texts(),
         'cityRank': load_city_rank(),
     }
     data_json = json.dumps(data, ensure_ascii=False)
