@@ -166,6 +166,6 @@ modules:
 # 数值字段取均值，天气现象取众数，再跑一次比对（报告格式与单次一致，只是数据更稳）
 # 改本段即可调窗口，无需改代码；运行: python3 scheduled_compare.py
 schedule:
-  interval_seconds: 600   # 拉取间隔（秒），600=每10分钟
-  avg_count: 6             # 攒满几次出一份平均报告
+  interval_seconds: 3600  # 拉取间隔（秒），3600=每1小时
+  avg_count: 48            # 攒满几次出一份平均报告，48次=2天
   keep_raw: true           # 每次原始JSON落盘留底（true=留，false=不留省空间）

@@ -34,12 +34,14 @@ def now_str():
 # 第一部分：单次拉取 + 累积
 # =========================================================
 
-def pull_once(cities, raw_subdir, pull_n):
+def pull_once(cities, out_dir, pull_n):
     """全量拉一次。返回 (points列表, 成功城数, 跳过城数)。
+    原始JSON完整保存(不加工)：原始json_{时间戳}/{城市}_{时间戳}/国内.json + 国际.json。
     points 未合并进累积器，由调用方在整次拉取成功后合并（中断可丢弃，不污染累积器）"""
     pts_all = []
-    raw_pull = {}
     ok = 0; skip = 0
+    ts = now_str()
+    raw_top = os.path.join(out_dir, f'原始json_{ts}')
     for idx, (name, lon, lat) in enumerate(cities, 1):
         cn_data, in_data = rt.fetch_city(name, lon, lat)
         if cn_data is None:
@@ -51,18 +53,17 @@ def pull_once(cities, raw_subdir, pull_n):
             print(f"  [{idx}/{len(cities)}] ⏭️ {name} 国际接口失败, 跳过")
             continue
         if KEEP_RAW:
-            raw_pull[name] = {'cn': cn_data, 'in': in_data}
+            city_dir = os.path.join(raw_top, f'{name}_{ts}')
+            os.makedirs(city_dir, exist_ok=True)
+            with open(os.path.join(city_dir, '国内.json'), 'w', encoding='utf-8') as f:
+                json.dump(cn_data, f, ensure_ascii=False)
+            with open(os.path.join(city_dir, '国际.json'), 'w', encoding='utf-8') as f:
+                json.dump(in_data, f, ensure_ascii=False)
         # build_points 一次即可：strict 只影响 ok/diff，cn/iv 原值两种口径相同
         pts_all += rt.build_points(name, cn_data, in_data, strict=False)
         ok += 1
         if idx % 10 == 0 or idx == len(cities):
             print(f"  [{idx}/{len(cities)}] {name} ✅")
-
-    # 每次拉取落一个原始JSON留底（keep_raw=true 时）
-    if KEEP_RAW and raw_pull:
-        os.makedirs(raw_subdir, exist_ok=True)
-        with open(os.path.join(raw_subdir, f'pull{pull_n}_{now_str()}.json'), 'w', encoding='utf-8') as f:
-            json.dump(raw_pull, f, ensure_ascii=False)
     return pts_all, ok, skip
 
 
@@ -149,9 +150,13 @@ def emit_reports(acc, avg_count, window_start, window_end):
         return
 
     tag = f'{avg_count}次均值_{window_start}-{window_end}'
-    xlsx_strict = os.path.join(OUT_DIR, f'一致性比对报告_均值_严格相等_{tag}.xlsx')
-    xlsx_threshold = os.path.join(OUT_DIR, f'一致性比对报告_均值_阈值口径_{tag}.xlsx')
-    csv_path = os.path.join(OUT_DIR, f'数据明细_均值_{tag}.csv')
+    date = window_end[:8]
+    strict_dir = os.path.join(OUT_DIR, '严格相等报告', date); os.makedirs(strict_dir, exist_ok=True)
+    th_dir = os.path.join(OUT_DIR, '阈值口径报告', date); os.makedirs(th_dir, exist_ok=True)
+    csv_dir = os.path.join(OUT_DIR, '数据明细CSV', date); os.makedirs(csv_dir, exist_ok=True)
+    xlsx_strict = os.path.join(strict_dir, f'一致性比对报告_均值_严格相等_{tag}.xlsx')
+    xlsx_threshold = os.path.join(th_dir, f'一致性比对报告_均值_阈值口径_{tag}.xlsx')
+    csv_path = os.path.join(csv_dir, f'数据明细_均值_{tag}.csv')
 
     extra = [
         f'本报告为定时均值比对: 每 {INTERVAL}s 拉一次, 攒满 {avg_count} 次取平均后比对',
@@ -159,7 +164,7 @@ def emit_reports(acc, avg_count, window_start, window_end):
         '数值字段: 多次国内值/海外值分别取均值后比对',
         '天气现象: 取众数(最常出现)后按语义映射比对',
         '风速: 海外值已是 ÷3.6 换算后的 m/s, 均值后直接相减',
-        f'原始JSON留底: data/比对结果/原始JSON_均值/{window_start}/',
+        '原始JSON留底: data/比对结果/原始json_<拉取时间戳>/<城市>_<时间戳>/国内.json + 国际.json（完整不加工）',
     ]
 
     n1 = rt.gen_xlsx(strict_pts, f'严格相等({avg_count}次均值)', xlsx_strict, extra_notes=extra)
@@ -217,23 +222,24 @@ def save_state(acc, pulls_done, window_start):
 
 
 def load_state():
-    """启动时尝试加载未完成窗口的状态。仅当状态文件存在且为当天才续跑"""
+    """启动时尝试加载未完成窗口的状态。窗口未满即续跑（支持跨天长窗口，如2天48次）"""
     if not os.path.exists(STATE_PATH):
         return {}, 0, None
     try:
         with open(STATE_PATH, encoding='utf-8') as f:
             d = json.load(f)
         ws = d.get('window_start', '')
-        # 仅当天续跑（跨天数据已失效，天气实况会变）
-        if not ws.startswith(datetime.datetime.now().strftime('%Y%m%d')):
-            print(f"  状态文件为非当天({ws}), 丢弃, 全新开始")
+        pd = d.get('pulls_done', 0)
+        # 窗口未满即续跑（支持跨天长窗口，如2天48次均值）
+        if pd >= AVG_COUNT:
+            print(f"  状态文件窗口已满({pd}/{AVG_COUNT}), 丢弃, 全新开始")
             os.remove(STATE_PATH)
             return {}, 0, None
         acc = {}
         for e in d['acc']:
             acc[tuple(e['key'])] = {'cn': e['cn'], 'iv': e['iv'], 'period': e['period']}
-        print(f"  ✅ 续跑: 已累积 {d['pulls_done']}/{AVG_COUNT} 次 (窗口 {ws})")
-        return acc, d['pulls_done'], ws
+        print(f"  ✅ 续跑: 已累积 {pd}/{AVG_COUNT} 次 (窗口 {ws})")
+        return acc, pd, ws
     except Exception as ex:
         print(f"  状态文件读取失败({ex}), 全新开始")
         return {}, 0, None
@@ -267,7 +273,7 @@ def main():
             pull_n = pulls_done + 1
             print(f"\n[{datetime.datetime.now():%H:%M:%S}] 第 {pull_n}/{AVG_COUNT} 次拉取开始 (窗口 {window_start})")
 
-            pts_all, ok, skip = pull_once(cities, os.path.join(RAW_DIR, window_start), pull_n)
+            pts_all, ok, skip = pull_once(cities, OUT_DIR, pull_n)
 
             # 整次拉取成功后，才合并进累积器（中断可丢弃本次，不污染已有数据）
             merge_pull(acc, pts_all)

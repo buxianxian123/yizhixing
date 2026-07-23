@@ -10,3 +10,5 @@ __pycache__/
 一致性比对报告docx生成器_方案.md
 data/样式参考.pdf
 国内天气现象接口.pdf
+utils/echarts.min.js
+.claude/
