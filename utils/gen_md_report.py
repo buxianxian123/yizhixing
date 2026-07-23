@@ -58,10 +58,10 @@ def parse_rate(r):
 def find_inputs(xlsx_arg=None):
     if xlsx_arg:
         return xlsx_arg
-    fs = sorted(glob.glob(os.path.join(OUT_DIR, '一致性比对报告_均值_阈值口径_*.xlsx')))
+    fs = glob.glob(os.path.join(OUT_DIR, '**', '一致性比对报告_均值_阈值口径_*.xlsx'), recursive=True)
     if not fs:
         raise SystemExit('❌ 未找到均值阈值口径 xlsx，请先跑 scheduled_compare.py / reformat_threshold.py')
-    return fs[-1]
+    return max(fs, key=os.path.getmtime)
 
 
 def read_summary(xlsx):

@@ -69,12 +69,14 @@ def find_inputs(xlsx_arg=None):
     if xlsx_arg:
         xlsx = xlsx_arg
     else:
-        fs = sorted(glob.glob(os.path.join(OUT_DIR, '一致性比对报告_均值_阈值口径_*.xlsx')))
+        fs = glob.glob(os.path.join(OUT_DIR, '**', '一致性比对报告_均值_阈值口径_*.xlsx'), recursive=True)
         if not fs:
             raise SystemExit('❌ 未找到阈值口径 xlsx，请先跑 reformat_threshold.py / scheduled_compare.py')
-        xlsx = fs[-1]
-    cs = glob.glob(os.path.join(OUT_DIR, '数据明细_均值_*.csv'))
-    csv_path = max(cs, key=os.path.getmtime) if cs else None
+        xlsx = max(fs, key=os.path.getmtime)
+    # csv 与 xlsx 同源（同tag），递归匹配子目录（定时任务报告在 阈值口径报告/<日期>/、数据明细CSV/<日期>/）
+    tag = os.path.basename(xlsx).replace('一致性比对报告_均值_阈值口径_', '').replace('.xlsx', '')
+    cs = glob.glob(os.path.join(OUT_DIR, '**', f'数据明细_均值_{tag}.csv'), recursive=True)
+    csv_path = cs[0] if cs else None
     return xlsx, csv_path
 
 
