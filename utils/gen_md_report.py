@@ -217,6 +217,24 @@ def build_md(summary, top5, thresholds, meta):
     total_ok = sum(a['ok'] for a in mod_agg.values())
     overall_rate = total_ok / total_valid * 100 if total_valid else 0
 
+    # 字段大类一致率(每模块每大类聚合,无则'-')
+    FIELD_CATS = [
+        ('温度', ['温度','温度(最高)','温度(最低)']),
+        ('体感温度', ['体感温度','体感温度(白天)','体感温度(夜间)']),
+        ('湿度', ['湿度']),
+        ('风速', ['风速','风速(白天)','风速(夜间)']),
+        ('气压', ['气压']),
+        ('天气现象', ['天气现象','天气现象(白天)','天气现象(夜间)']),
+        ('AQI', ['AQI']),
+    ]
+    def cat_rate(module, fields):
+        ok=valid=0
+        for s in summary:
+            if s['module']==module and s['field'] in fields:
+                ok += s['ok'] or 0
+                valid += s['valid'] or 0
+        return f"{ok/valid*100:.1f}%" if valid else '-'
+
     md = f"""# 墨迹国际化与国内版本天气数据一致性测试报告
 
 > 报告时间：{meta['time']}
@@ -226,16 +244,15 @@ def build_md(summary, top5, thresholds, meta):
 
 ## 一、测试结论
 
-　　本次测试共比对 {total_valid} 个有效数据点（{meta['cities']} 个城市 × 4 大模块），其中 {total_ok} 条数据一致，整体一致率为 {overall_rate:.1f}%。
+　　本次测试覆盖 {meta['cities']} 个城市 × {meta['avg_count']} 份拉取（共 {meta['cities']*meta['avg_count']} 个采样点），整体一致率 {overall_rate:.1f}%。
 
-| 模块 | 数据点 | 一致数 | 一致率 |
-|---|---|---|---|
+| 模块 | 数据点 | """ + ' | '.join(c[0] for c in FIELD_CATS) + f""" |
+|---|---|""" + '|'.join(['---']*len(FIELD_CATS)) + f""" |
 """
     for m in MODULE_LIST:
         if m in mod_agg:
-            a = mod_agg[m]
-            r = a['ok'] / a['valid'] * 100 if a['valid'] else 0
-            md += f"| {MOD_DISPLAY[m]} | {a['total']} | {a['ok']} | {r:.1f}% |\n"
+            cells = [cat_rate(m, c[1]) for c in FIELD_CATS]
+            md += f"| {MOD_DISPLAY[m]} | {meta['avg_count']}*{meta['cities']} | " + ' | '.join(cells) + " |\n"
 
     # ---- 核心发现（从数据算） ----
     weather_rates = [parse_rate(s['rate']) for s in summary if is_weather(s['field']) and (s['valid'] or 0) > 0]
@@ -366,6 +383,8 @@ def main():
     top5 = read_top5(xlsx)
     thresholds = read_thresholds()
     koujing, cities = read_meta(xlsx)
+    _am = re.search(r'(\d+)次均值', os.path.basename(xlsx))
+    avg_count = int(_am.group(1)) if _am else 1
 
     meta = {
         'time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M'),
@@ -373,6 +392,7 @@ def main():
         'koujing': koujing,
         'cities': cities,
         'sample': parse_sample(xlsx),
+        'avg_count': avg_count,
     }
 
     md = build_md(summary, top5, thresholds, meta)

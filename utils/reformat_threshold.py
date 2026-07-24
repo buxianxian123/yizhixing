@@ -235,7 +235,8 @@ def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
     import re
     _m = re.search(r'(\d+)次均值', title)
     _avg_n = int(_m.group(1)) if _m else 0
-    def _cnt(n): return f'{n}次/{_avg_n}份' if _avg_n > 1 else f'{n}次'
+    _cities = len(set(p[0] for p in allP))
+    def _cnt(n): return f'{n}/{_cities*_avg_n}' if _avg_n > 1 else f'{n}次'
 
     # ---------- Sheet1 数据明细 ----------
     wb = openpyxl.Workbook()
