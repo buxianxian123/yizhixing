@@ -164,13 +164,18 @@ def load_city_rank():
 # HTML 生成
 # =========================================================
 
-def build_html(data_json, echarts_js, meta, thresholds):
+def build_html(data_json, echarts_js, meta, thresholds, rain_th):
     echarts_js = echarts_js.replace('</script>', '<\\/script>')
     data_json = data_json.replace('</script>', '<\\/script>')
 
     th_rows = ''.join(
         f'<tr><td>{k}</td><td>≤ {v}</td></tr>' for k, v in thresholds.items()
     ) or '<tr><td colspan="2">（读配置失败）</td></tr>'
+
+    rain_rows = ''.join(
+        f'<tr><td>{n}</td><td>{"∞" if th in ("~", None) else th}</td></tr>'
+        for n, th in rain_th.items()
+    ) if rain_th else '<tr><td colspan="2">（无降水量配置）</td></tr>'
 
     html = r"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -402,7 +407,7 @@ td.top5{background:var(--top5)}
       </div>
       <div class="card-note" id="fieldBar-note"></div></div>
 
-    <div class="card span2" id="card-trend24"><div class="card-head"><span class="card-title">24小时时效趋势<span class="card-sub">每字段一小图 · 短/中/长时效一致率</span></span></div>
+    <div class="card span2" id="card-trend24"><div class="card-head"><span class="card-title">24小时时效准确率趋势<span class="card-sub">每字段一小图 · 短/中/长时效一致率</span></span></div>
       <div class="trend24-grid" id="trend24-grid"></div></div>
     <div class="card span2" id="card-devHist"><div class="card-head"><span class="card-title">偏差分布<span class="card-sub">点选右侧字段，各字段量级独立</span></span></div>
       <div class="split-layout">
@@ -464,7 +469,10 @@ td.top5{background:var(--top5)}
     <h4>一、一致判定阈值（数值字段）</h4>
     <table><thead><tr><th>字段</th><th>一致判定阈值</th></tr></thead><tbody>__TH_ROWS__</tbody></table>
     <p>差异 = 国内值 − 海外值；正数表示国内 &gt; 海外，负数表示国内 &lt; 海外。缺数据不计入一致率分母。</p>
-    <h4>二、天气现象语义映射（五分制）</h4>
+    <h4>二、降水量等级比对</h4>
+    <p>降水量不设数值阈值，采用等级比对：国内值/海外值分别映射到降水量等级，等级相同即判一致。规则来自 <code>compare_config.yaml → rain_thresholds</code>：</p>
+    <table><thead><tr><th>等级</th><th>降水量区间 (mm)</th></tr></thead><tbody>__RAIN_ROWS__</tbody></table>
+    <h4>三、天气现象语义映射（五分制）</h4>
     <ul>
       <li><b>5分</b> 主天气一致+量级一致 -> 完全匹配（唯一算"一致"）</li>
       <li><b>4分</b> 主天气一致+量级差1级 -> 轻微量级偏差</li>
@@ -474,11 +482,11 @@ td.top5{background:var(--top5)}
       <li><b>0分</b> 高影响天气+不同大类 -> 高影响漏报/错判</li>
     </ul>
     <p>高影响天气：大雨/暴雨/大暴雨/特大暴雨/大雪/暴雪/雷暴/冰雹。阴/雾/霾归入多云大类。</p>
-    <h4>三、风速换算</h4>
+    <h4>四、风速换算</h4>
     <p>国内风速 m/s，海外 km/h，海外值 ÷3.6 换算为 m/s 后比对。</p>
-    <h4>四、风险与遗留项</h4>
+    <h4>五、风险与遗留项</h4>
     <ul class="risk">
-      <li>海外城市未覆盖：国内接口不支持海外城市，本次仅覆盖国内城市为主</li>
+      <li>海外城市未覆盖：国内接口不支持海外城市，本次以国内城市为主，部分城市如吉隆坡等为国内接口可覆盖的海外城市</li>
       <li>AQI 一致率极低（约 4.6%），两套数据源存在系统性差异，需排查归一化逻辑</li>
       <li>气压高原系统性偏差：拉萨等高原城市偏差可达 400hPa，疑海拔/气压基准不同</li>
       <li>体感温度偏差大：15天白天一致率仅约 10%，体感计算模型差异可能是主因</li>
@@ -500,7 +508,7 @@ const MODULE_LIST = ['实况','24小时','15天','AQI模块'];
 const FIELD_LIST = [...new Set(detail.map(r=>r[F]))].sort();
 const PERIOD_LIST = ['短时效(1-6h)','中时效(7-12h)','长时效(13-24h)'];
 // 字段展示顺序
-const FIELD_ORDER = ['温度','体感温度','湿度','风速','气压','天气现象',
+const FIELD_ORDER = ['温度','体感温度','湿度','风速','气压','天气现象','降水量',
   '温度(最高)','温度(最低)','体感温度(白天)','体感温度(夜间)',
   '风速(白天)','风速(夜间)','天气现象(白天)','天气现象(夜间)','AQI'];
 
@@ -1072,6 +1080,7 @@ initAll();
     html = html.replace('__CITIES__', str(meta['cities']))
     html = html.replace('__POINTS__', str(meta['points']))
     html = html.replace('__TH_ROWS__', th_rows)
+    html = html.replace('__RAIN_ROWS__', rain_rows)
     return html
 
 
@@ -1089,6 +1098,8 @@ def main():
     summary = read_summary(xlsx)
     detail = read_detail(csv_path) if csv_path else []
     thresholds = read_thresholds()
+    import yaml as _yml
+    rain_th = _yml.safe_load(open(CONFIG_PATH, encoding='utf-8')).get('rain_thresholds', {}) or {}
     echarts_js = read_echarts()
 
     cities = len(set(r[0] for r in detail)) if detail else 0
@@ -1128,7 +1139,7 @@ def main():
     }
     data_json = json.dumps(data, ensure_ascii=False)
 
-    html = build_html(data_json, echarts_js, meta, thresholds)
+    html = build_html(data_json, echarts_js, meta, thresholds, rain_th)
 
     out_path = os.path.join(OUT_DIR, f'一致性比对报告_HTML_{TIMESTAMP}.html')
     with open(out_path, 'w', encoding='utf-8') as f:

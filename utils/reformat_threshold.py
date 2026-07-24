@@ -36,6 +36,19 @@ MODULES = config['modules']
 WEATHER_MAP = config.get('weather_mapping', {})
 WTH_TEXTS = WEATHER_MAP.get('texts', {})
 
+# ====== 降水量等级配置 ======
+_rain_raw = config.get('rain_thresholds', {})
+RAIN_TH = []          # [(上界, 等级名), ...]
+RAIN_NAMES = []       # [等级名, ...]
+for name, th in _rain_raw.items():
+    if th == '~' or th is None:
+        RAIN_TH.append((float('inf'), name))
+    else:
+        RAIN_TH.append((float(th), name))
+    RAIN_NAMES.append(name)
+# 按上界升序排序
+RAIN_TH.sort(key=lambda x: x[0])
+
 # ====== 24小时时效分段 ======
 PERIODS_24H = [
     ('短时效(1-6h)', 0, 6),
@@ -94,6 +107,14 @@ def wind_convert(v):
 def text_diff(cv, iv):
     if cv is None or iv is None: return ''
     return '一致' if cv == iv else '不一致'
+
+def rain_level(v):
+    """降水量mm → 等级索引(从0开始), 等级定义来自 compare_config.yaml rain_thresholds"""
+    if v is None: return None
+    for i, (th, _) in enumerate(RAIN_TH):
+        if v < th:
+            return i
+    return len(RAIN_TH) - 1
 
 def get_threshold(field):
     """按字段名匹配阈值（支持'温度(最高)'等带括号字段）"""
@@ -185,10 +206,21 @@ def cmp_point(city, module, field, ts, cnv, iv, spec, period='', strict=False):
         diff, ok = calc_weather_deviation(cnv, iv)
         return (city, module, field, ts, cnv, iv, diff, ok, '按语义映射比对', period)
 
+    if typ == 'rain_level':
+        cv = num(cnv); iv_conv = num(iv)
+        if cv is None or iv_conv is None:
+            return (city, module, field, ts, cnv, iv, '', '缺数据', note, period)
+        cl = rain_level(cv); il = rain_level(iv_conv)
+        diff = round(abs(cv - iv_conv), 2)
+        ok = '一致' if cl == il else '不一致'
+        cn_lv = RAIN_NAMES[cl] if cl is not None else '?'
+        in_lv = RAIN_NAMES[il] if il is not None else '?'
+        return (city, module, field, ts, cnv, iv, diff, ok, f'国内{cn_lv} vs 海外{in_lv}', period)
+
     if cv is None or iv_conv is None:
         return (city, module, field, ts, cnv, iv, '', '缺数据', note, period)
 
-    diff = round(cv - iv_conv, 2)
+    diff = round(abs(cv - iv_conv), 2)
     if strict:
         ok = '一致' if diff == 0 else '不一致'
     else:
@@ -255,6 +287,19 @@ def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
         if p[7] == '一致': cell.fill = green
         elif p[7] == '不一致': cell.fill = red
         else: cell.fill = gray
+        # 差异列(column 7) 数值带单位
+        diff_cell = ws.cell(row=i, column=7)
+        if isinstance(p[6], (int, float)):
+            f = p[2]
+            u = ''
+            if '天气现象' not in f:
+                if '温度' in f or '体感' in f: u = '℃'
+                elif '湿度' in f: u = '%'
+                elif '风速' in f: u = 'm/s'
+                elif '气压' in f: u = 'hPa'
+                elif '降水' in f: u = 'mm'
+            if u:
+                diff_cell.value = f'{p[6]}{u}'
     for col, w in zip('ABCDEFGHIJ', [12, 10, 14, 18, 14, 14, 10, 10, 22, 14]):
         ws.column_dimensions[col].width = w
     ws.freeze_panes = 'A2'
@@ -343,6 +388,17 @@ def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
             else:
                 avg_display = round(s['sumdiff'] / s['n'], 2) if s['n'] else ''
                 max_display = s['maxdiff']
+            # 数值字段加单位
+            if '天气现象' not in field and isinstance(avg_display, (int, float)):
+                u = ''
+                if '温度' in field or '体感' in field: u = '℃'
+                elif '湿度' in field: u = '%'
+                elif '风速' in field: u = 'm/s'
+                elif '气压' in field: u = 'hPa'
+                elif '降水' in field: u = 'mm'
+                avg_display = f'{avg_display}{u}'
+                if isinstance(max_display, (int, float)):
+                    max_display = f'{max_display}{u}'
 
             ws2.append([field, m, period, s['total'], s['miss'], s['n'], s['ok'], rate, avg_display, max_display, s['maxcity']])
     for col, w in zip('ABCDEFGHIJK', [16, 10, 14, 8, 14, 10, 8, 10, 10, 10, 14]):
@@ -377,7 +433,15 @@ def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
                     pair_str = f'国内{cn_val}→国外{intl_val}'
                 else:
                     pair_str = ''
-                ws_top.append([m, field, period or '', rank, city, pair_str, round(d, 2)])
+                u = ''
+                if '天气现象' not in field:
+                    if '温度' in field or '体感' in field: u = '℃'
+                    elif '湿度' in field: u = '%'
+                    elif '风速' in field: u = 'm/s'
+                    elif '气压' in field: u = 'hPa'
+                    elif '降水' in field: u = 'mm'
+                d_val = round(d, 2)
+                ws_top.append([m, field, period or '', rank, city, pair_str, f'{d_val}{u}' if u else d_val])
     for col, w in zip('ABCDEFG', [10, 16, 14, 6, 14, 16, 10]):
         ws_top.column_dimensions[col].width = w
     ws_top.freeze_panes = 'A2'

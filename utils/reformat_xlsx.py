@@ -17,14 +17,39 @@ def num(v):
 WIND=lambda x: round(x/3.6,2)
 
 def diff_str(cv, iv):
-    """数值差异"""
+    """数值差异（绝对值）"""
     if cv is None or iv is None: return ''
-    return round(cv-iv,2)
+    return round(abs(cv-iv), 2)
 
 def text_diff(cv, iv):
     """天气现象：按中文文字内容比对"""
     if cv is None or iv is None: return ''
     return '一致' if cv==iv else '不一致'
+
+# 降水量等级规则从 compare_config.yaml 读取（与主流程同源）
+import yaml as _yaml
+_CONF = _yaml.safe_load(open(os.path.join(SCRIPT_DIR, 'compare_config.yaml'), encoding='utf-8'))
+_RAW = _CONF.get('rain_thresholds', {})
+RAIN_TH = [(float('inf'), n) if th in ('~', None) else (float(th), n) for n, th in _RAW.items()]
+RAIN_TH.sort(key=lambda x: x[0])
+RAIN_NAMES = [n for _, n in RAIN_TH]
+
+def rain_level(v):
+    """降水量mm → 等级索引, 等级定义来自 compare_config.yaml rain_thresholds"""
+    if v is None: return None
+    for i, (th, _) in enumerate(RAIN_TH):
+        if v < th:
+            return i
+    return len(RAIN_TH) - 1
+
+def field_unit(f):
+    if f is None: return ''
+    if '温度' in f or '体感' in f: return '℃'
+    if '湿度' in f: return '%'
+    if '风速' in f: return 'm/s'
+    if '气压' in f: return 'hPa'
+    if '降水' in f: return 'mm'
+    return ''
 
 # 生成数据点: (城市,模块,字段,时次,国内值,海外值,差异,备注)
 def points(city, cn, ind):
@@ -37,6 +62,11 @@ def points(city, cn, ind):
     P.append((city,'实况','风速','实况',c.get('wspd'),WIND(num(i.get('wspd'))) if i.get('wspd') else None,diff_str(num(c.get('wspd')),WIND(num(i.get('wspd'))) if i.get('wspd') else None),f"海外原{i.get('wspd')} ÷3.6" if i.get('wspd') else ''))
     P.append((city,'实况','气压','实况',c.get('mslp'),i.get('sp'),diff_str(num(c.get('mslp')),num(i.get('sp'))),''))
     P.append((city,'实况','天气现象','实况',c.get('weather'),i.get('wtr'),text_diff(c.get('weather'),i.get('wtr')),'按中文文字比对'))
+    # 实况降水量：转等级比较
+    _cn_rl = rain_level(num(c.get('precip_1h'))); _in_rl = rain_level(num(i.get('precip')))
+    _rain_diff = diff_str(num(c.get('precip_1h')), num(i.get('precip')))
+    _rain_note = f'国内{RAIN_NAMES[_cn_rl]} vs 海外{RAIN_NAMES[_in_rl]}' if _cn_rl is not None and _in_rl is not None else '缺数据'
+    P.append((city,'实况','降水量','实况',c.get('precip_1h'),i.get('precip'),_rain_diff,_rain_note))
     # AQI模块
     P.append((city,'AQI模块','AQI','AQI实况',a.get('aqi'),b.get('AQI'),diff_str(num(a.get('aqi')),num(b.get('AQI'))),''))
     P.append((city,'AQI模块','PM2.5','AQI实况',a.get('pm25'),b.get('PM2P5'),diff_str(num(a.get('pm25')),num(b.get('PM2P5'))),'国内浓度vs海外(疑分指数)'))
@@ -64,6 +94,7 @@ def points(city, cn, ind):
         P.append((city,'15天','气压',ts,x.get('mslp'),y.get('spd'),diff_str(num(x.get('mslp')),num(y.get('spd'))),'海外取白天spd'))
         P.append((city,'15天','天气现象(白天)',ts,x.get('weather_day'),y.get('wtrd'),text_diff(x.get('weather_day'),y.get('wtrd')),'按中文文字比对'))
         P.append((city,'15天','天气现象(夜间)',ts,x.get('weather_night'),y.get('wtrn'),text_diff(x.get('weather_night'),y.get('wtrn')),'按中文文字比对'))
+        P.append((city,'15天','降水量',ts,x.get('qpf'),y.get('qpf'),diff_str(num(x.get('qpf')),num(y.get('qpf'))),'近日总降水量mm'))
     return P
 
 def main():
@@ -86,12 +117,15 @@ def main():
     green=PatternFill('solid',fgColor='E6F7E6'); red=PatternFill('solid',fgColor='FFE6E6')
     for p in allP:
         ws.append(list(p))
-    # 差异列着色(一致绿/不一致红)
+    # 差异列着色(一致绿/不一致红)+ 带单位
     for i,p in enumerate(allP,2):
-        d=p[6]
+        d=p[6]; field=p[2]
         cell=ws.cell(row=i,column=7)
         if d=='一致': cell.fill=green
         elif d=='不一致' or (isinstance(d,(int,float)) and d!=0): cell.fill=red
+        if isinstance(d,(int,float)):
+            u=field_unit(field)
+            cell.value=f'{d}{u}' if u else d
     for col,w in zip('ABCDEFGH',[12,10,14,18,16,16,12,22]): ws.column_dimensions[col].width=w
     ws.freeze_panes='A2'
 
@@ -119,8 +153,10 @@ def main():
         for (field,m),s in sorted(stat.items()):
             if m!=module: continue
             rate=f"{s['ok']/s['n']*100:.1f}%" if s['n'] else '0'
-            ws2.append([field,m,s['n'],s['ok'],rate,s['maxdiff'],s['maxcity']])
-    for col,w in zip('ABCDEFG',[16,10,8,8,10,10,14]): ws2.column_dimensions[col].width=w
+            u=field_unit(field)
+            maxdiff_disp = f"{s['maxdiff']}{u}" if u and isinstance(s['maxdiff'],(int,float)) else s['maxdiff']
+            ws2.append([field,m,s['n'],s['ok'],rate,maxdiff_disp,s['maxcity']])
+    for col,w in zip('ABCDEFG',[16,10,8,8,10,14,14]): ws2.column_dimensions[col].width=w
 
     # 说明
     ws3=wb.create_sheet('说明')
@@ -134,7 +170,7 @@ def main():
         '5. AQI: 国内 aqi vs 海外 AQI, 直接比',
         '6. 15天气压: 国内 mslp(单值) vs 海外 spd(白天), 海外spn夜间未纳入',
         '7. 时次对齐: 24小时按predict_time, 15天按predict_date, 已转北京时区对齐',
-        '8. 国内不覆盖城市(伦敦/纽约等海外)未纳入, 国内接口返回Out Of Query Range',
+        '8. 海外城市未纳入: 国内接口不支持大部分海外城市, 可能返回Out Of Query Range, 本次以国内城市为主',
         '9. 差异列: 数值=国内-海外(正值国内大); 天气=一致/不一致; 红色=不一致',
         '',
         '⚠️ 严格相等下小差异(温度<3度)是数据源/时次正常波动, 非bug;',

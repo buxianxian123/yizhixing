@@ -18,7 +18,7 @@ BASE = os.path.join(SCRIPT_DIR, '..', 'data')
 OUT_DIR = os.path.join(BASE, '比对结果')
 CONFIG_PATH = os.path.join(SCRIPT_DIR, 'compare_config.yaml')
 
-FIELD_ORDER = ['温度', '体感温度', '湿度', '风速', '气压', '天气现象',
+FIELD_ORDER = ['温度', '体感温度', '湿度', '风速', '气压', '天气现象', '降水量',
                '温度(最高)', '温度(最低)', '体感温度(白天)', '体感温度(夜间)',
                '风速(白天)', '风速(夜间)', '天气现象(白天)', '天气现象(夜间)', 'AQI']
 PERIODS_24 = ['短时效(1-6h)', '中时效(7-12h)', '长时效(13-24h)']
@@ -40,15 +40,24 @@ def unit(f):
 
 def fmt_num(v, f):
     if v is None or v == '': return '-'
+    s = str(v)
     u = unit(f)
-    return f"{v}{u}" if u else f"{v}"
-
-
+    if u and u not in s:
+        return f"{s}{u}"
+    return s
 def parse_rate(r):
     if r is None: return 0.0
     s = str(r).replace('%', '').strip()
     try: return float(s) if s else 0.0
     except ValueError: return 0.0
+
+def parse_num(s):
+    """从可能带单位的字符串中提取数值，如 '3℃' -> 3.0"""
+    if s is None: return 0.0
+    if isinstance(s, (int, float)): return float(s)
+    import re
+    m = re.search(r'[\d.]+', str(s))
+    return float(m.group()) if m else 0.0
 
 
 # =========================================================
@@ -102,9 +111,11 @@ def read_thresholds():
     try:
         import yaml
         cfg = yaml.safe_load(open(CONFIG_PATH, encoding='utf-8'))
-        return cfg.get('thresholds', {})
+        th = cfg.get('thresholds', {})
+        rain = cfg.get('rain_thresholds', {})
+        return th, rain
     except Exception:
-        return {}
+        return {}, {}
 
 
 def read_meta(xlsx):
@@ -158,8 +169,6 @@ def field_table(rows):
             md += f"| {s['field']} | {s['rate']} | {fmt_num(s['avgDev'], s['field'])} | {fmt_num(s['maxDev'], s['field'])} |\n"
         for s in weather:
             md += f"| {s['field']} | {s['rate']} | {s['avgDev'] or '-'} | {s['maxDev'] or '-'} |\n"
-        if weather:
-            md += '\n*注：天气现象行的平均偏差为同类型出现最多次数的偏差，非数值偏差。*\n'
     return md
 
 
@@ -204,7 +213,7 @@ def top5_table(top5_rows):
     return md
 
 
-def build_md(summary, top5, thresholds, meta):
+def build_md(summary, top5, thresholds, rain_th, meta):
     # ---- 模块汇总 ----
     mod_agg = {}
     for s in summary:
@@ -225,6 +234,7 @@ def build_md(summary, top5, thresholds, meta):
         ('风速', ['风速','风速(白天)','风速(夜间)']),
         ('气压', ['气压']),
         ('天气现象', ['天气现象','天气现象(白天)','天气现象(夜间)']),
+        ('降水量', ['降水量']),
         ('AQI', ['AQI']),
     ]
     def cat_rate(module, fields):
@@ -244,7 +254,7 @@ def build_md(summary, top5, thresholds, meta):
 
 ## 一、测试结论
 
-　　本次测试覆盖 {meta['cities']} 个城市 × {meta['avg_count']} 份拉取（共 {meta['cities']*meta['avg_count']} 个采样点），整体一致率 {overall_rate:.1f}%。
+　　本次测试覆盖 {meta['cities']} 个城市 × {meta['avg_count']} 份拉取（共 {meta['cities']*meta['avg_count']} 个采样点），具体一致率统计如下表。
 
 | 模块 | 数据点 | """ + ' | '.join(c[0] for c in FIELD_CATS) + f""" |
 |---|---|""" + '|'.join(['---']*len(FIELD_CATS)) + f""" |
@@ -252,7 +262,7 @@ def build_md(summary, top5, thresholds, meta):
     for m in MODULE_LIST:
         if m in mod_agg:
             cells = [cat_rate(m, c[1]) for c in FIELD_CATS]
-            md += f"| {MOD_DISPLAY[m]} | {meta['avg_count']}*{meta['cities']} | " + ' | '.join(cells) + " |\n"
+            md += f"| {MOD_DISPLAY[m]} | {meta['avg_count']*meta['cities']} | " + ' | '.join(cells) + " |\n"
 
     # ---- 核心发现（从数据算） ----
     weather_rates = [parse_rate(s['rate']) for s in summary if is_weather(s['field']) and (s['valid'] or 0) > 0]
@@ -265,7 +275,7 @@ def build_md(summary, top5, thresholds, meta):
     feel = [s for s in summary if '体感温度' in s['field']]
     feel_weakest = min(feel, key=lambda s: parse_rate(s['rate'])) if feel else None
     pressure = [s for s in summary if s['field'] == '气压']
-    pres_max = max(pressure, key=lambda s: abs(s['maxDev']) if isinstance(s['maxDev'], (int, float)) else 0) if pressure else None
+    pres_max = max(pressure, key=lambda s: abs(parse_num(s['maxDev']))) if pressure else None
 
     md += '\n核心发现：\n\n'
     md += f"- 天气现象类一致率（均值 {w_avg:.1f}%）{'显著高于' if w_avg > n_avg else '与'}数值类（{n_avg:.1f}%），语义映射优化效果明显\n"
@@ -293,6 +303,22 @@ def build_md(summary, top5, thresholds, meta):
     for k, v in thresholds.items():
         md += f"| {k} | ≤ {v}{unit(k)} |\n"
     md += """
+**降水量字段：**
+
+等级比对规则：
+
+| 等级 | 降水量区间 (mm) |
+|---|---|
+"""
+    prev = 0
+    for name, th in rain_th.items():
+        ub = f"{th}" if th not in ('~', None) else '∞'
+        md += f"| {name} | [{prev}, {ub}) |\n"
+        if th not in ('~', None):
+            prev = th
+    md += """
+*比对方式：国内值/海外值分别映射到降水量等级，等级相同即判一致。*
+
 **天气现象字段：**
 
 采用语义映射五分制评分，偏差计算规则如下：
@@ -313,7 +339,7 @@ def build_md(summary, top5, thresholds, meta):
 | 1分 | 涉及高影响天气但同大类 | 高影响偏差 |
 | 0分 | 高影响天气 + 不同大类 | 高影响漏报/错判 |
 
-*天气现象格式说明：表中 `国内A->国外B(N次)` 表示国内返回A、国外返回B的情况出现N次。数值字段偏差正负含义：差异 = 国内值 − 国外值，正数表示国内 > 国外，负数表示国内 < 国外。*
+
 
 ---
 
@@ -347,7 +373,7 @@ def build_md(summary, top5, thresholds, meta):
     md += f"""
 ## 五、测试说明
 
-- 测试范围：{meta['cities']} 个国内城市，覆盖实况 / 24小时逐时 / 15天预报 / AQI 四大模块
+- 测试范围：{meta['cities']} 个城市（以国内城市为主），覆盖实况 / 24小时逐时 / 15天预报 / AQI 四大模块
 - 数据来源：国内版（coapi.moji.com）vs 国际版（datasw1.api.moweather.com）
 - 风速换算：国际版 km/h 统一 ÷3.6 换算为 m/s 后比对
 - 天气现象：两端均指定中文返回，按语义映射五分制评分比对；阴/雾/霾归入多云大类
@@ -357,7 +383,7 @@ def build_md(summary, top5, thresholds, meta):
 
 ## 六、风险与遗留项
 
-- 海外城市未覆盖：国内接口不支持海外城市，本次仅覆盖 {meta['cities']} 个国内城市
+- 海外城市未覆盖：国内接口不支持海外城市，本次以国内城市为主
 - 数据实时性：接口数据为实时拉取，存在时间窗口内波动影响
 """
     if aqi:
@@ -381,7 +407,7 @@ def main():
 
     summary = read_summary(xlsx)
     top5 = read_top5(xlsx)
-    thresholds = read_thresholds()
+    thresholds, rain_th = read_thresholds()
     koujing, cities = read_meta(xlsx)
     _am = re.search(r'(\d+)次均值', os.path.basename(xlsx))
     avg_count = int(_am.group(1)) if _am else 1
@@ -395,7 +421,7 @@ def main():
         'avg_count': avg_count,
     }
 
-    md = build_md(summary, top5, thresholds, meta)
+    md = build_md(summary, top5, thresholds, rain_th, meta)
     out_path = os.path.join(SCRIPT_DIR, '..', f'一致性比对报告_{datetime.datetime.now().strftime("%Y%m%d")}.md')
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write(md)

@@ -119,13 +119,28 @@ def average_all(acc, avg_count):
             note = f'按语义映射比对(众数,{count}次)'
             pt = (city, module, field, ts, cn_v, iv_v, diff, ok, note, period)
             strict_pts.append(pt); threshold_pts.append(pt)   # 天气两种口径一致
+        elif typ == 'rain_level':
+            cn_vals = [rt.num(c) for c, _ in pairs]
+            iv_vals = [rt.num(i) for _, i in pairs]
+            avg_cn = _mean(cn_vals)
+            avg_iv = _mean(iv_vals)
+            cl = rt.rain_level(avg_cn) if avg_cn is not None else None
+            il = rt.rain_level(avg_iv) if avg_iv is not None else None
+            avg_diff = round(abs(avg_cn - avg_iv), 2) if avg_cn is not None and avg_iv is not None else None
+            ok = '一致' if cl is not None and il is not None and cl == il else '不一致'
+            cn_lv = rt.RAIN_NAMES[cl] if cl is not None else '?'
+            in_lv = rt.RAIN_NAMES[il] if il is not None else '?'
+            note = f'国内{cn_lv} vs 海外{in_lv}({count}次均值)'
+            pt = (city, module, field, ts, avg_cn, avg_iv, avg_diff, ok, note, period)
+            # 降水量等级比对与阈值无关，严格/阈值两种口径结果相同
+            strict_pts.append(pt); threshold_pts.append(pt)
         else:
             # numeric / wind（wind 的 iv 已是 ÷3.6 后的 m/s，均值后直接相减）
             cn_vals = [rt.num(c) for c, _ in pairs]
             iv_vals = [rt.num(i) for _, i in pairs]
             avg_cn = _mean(cn_vals)
             avg_iv = _mean(iv_vals)
-            avg_diff = round(avg_cn - avg_iv, 2)
+            avg_diff = round(abs(avg_cn - avg_iv), 2)
             th = rt.get_threshold(field)
             ok_strict = '一致' if avg_diff == 0 else '不一致'
             ok_th = '一致' if (th is not None and abs(avg_diff) <= th) else '不一致'
