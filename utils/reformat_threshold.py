@@ -231,6 +231,11 @@ def _weather_level_diff(cn_val, intl_val):
 def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
     """生成一致性比对报告 xlsx
     extra_notes: 可选，追加到「说明」sheet 末尾的额外说明（如均值报告的采样信息），默认 None 不追加"""
+    # 从title解析均值次数(如"阈值口径(47次均值)"),天气误判次数标注"X次/N份"避免歧义
+    import re
+    _m = re.search(r'(\d+)次均值', title)
+    _avg_n = int(_m.group(1)) if _m else 0
+    def _cnt(n): return f'{n}次/{_avg_n}份' if _avg_n > 1 else f'{n}次'
 
     # ---------- Sheet1 数据明细 ----------
     wb = openpyxl.Workbook()
@@ -299,7 +304,7 @@ def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
                 mismatch = [(p, c) for p, c in sorted_pairs if p[0] != p[1]]  # 排除一致的
                 # 平均偏差：最常见的误判对，只写一个
                 if mismatch:
-                    avg_display = f'国内{mismatch[0][0][0]}→国外{mismatch[0][0][1]}({mismatch[0][1]}次)'
+                    avg_display = f'国内{mismatch[0][0][0]}→国外{mismatch[0][0][1]}({_cnt(mismatch[0][1])})'
                 else:
                     avg_display = round(s['sumdiff'] / s['n'], 2) if s['n'] else ''
                 # 最大偏差：按实际偏差等级算，找最高等级的常见误判对
@@ -327,11 +332,11 @@ def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
                                     rain_pair = (cn2, intl2)
                                     rain_cnt = cnt2
                         if rain_pair:
-                            max_display = f'国内{rain_pair[0]}→国外{rain_pair[1]}({rain_cnt}次)'
+                            max_display = f'国内{rain_pair[0]}→国外{rain_pair[1]}({_cnt(rain_cnt)})'
                         else:
-                            max_display = f'国内{best_pair[0]}→国外{best_pair[1]}({best_cnt}次)'
+                            max_display = f'国内{best_pair[0]}→国外{best_pair[1]}({_cnt(best_cnt)})'
                     else:
-                        max_display = f'偏差{int(max_dev)}级 {s["dev_counts"][max_dev]}次'
+                        max_display = f'偏差{int(max_dev)}级 {_cnt(s["dev_counts"][max_dev])}'
                 else:
                     max_display = s['maxdiff']
             else:
