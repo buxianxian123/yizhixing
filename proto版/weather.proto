@@ -1,0 +1,453 @@
+syntax = "proto2";
+option java_package = "com.moji.weather.bean.protobuf";
+option java_outer_classname = "MojiWeather";
+
+message Weather{
+	repeated		Detail				detail				= 1;//天气集合
+	optional		FestivalList		festivalList		= 2;//节假日列表
+	required 		sint32			  	code				= 3;//状态码
+	optional 		string			  	message				= 4;//提示信息
+	required		string				language			= 5;//语言
+	optional 		SplashList			splashList          = 6;//splash列表
+	required		sint64				updatetime			= 7;//更新时间
+	repeated		string				domain				= 8;//域名
+	required		Version				version				= 9;//版本升级信息
+	required 		sint32				useThisAd			= 10[default = 0];//是否使用天气中的广告数据
+	optional		sint32 				showSearch			= 11[default = 1];//是否显示搜索框
+	optional    Radar         radar               = 12;//短时雷达气象数据精简后集成返给前端，避免前端2次查询。
+	optional    string        extJson             = 13;//扩展json，返回一些杂项配置， 比如天气iOS widget 天气排行
+
+	message Version {
+		required	sint64				code				= 1;//版本号
+		required	string				url					= 2;//下载链接
+		required	string				title				= 3;//标题
+		required	string				description			= 4;//描述
+		required	sint32				forceUpdate			= 5[default = 0];//是否强制升级(0:否 1:是)
+		optional	sint64				grayCode			= 6;//灰度测试版本
+	}
+
+	message Detail {
+		optional	Condition    	  	condition         	= 1;//实况
+		optional	ForecastDayList  	forecastDayList		= 2;//天预报
+		optional	ForecastHourList 	forecastHourList	= 3;//小时预报
+		optional	IndexList		  	indexList 			= 4;//指数
+		optional	AlertList		  	alertList 			= 5;//预警
+		optional 	AQI					aqi			    	= 6;//空气指数
+		optional 	Avatar			 	avatar				= 7;//avatar
+		required	sint64				timestamp			= 8;//时间戳
+		required	sint64				cityId				= 9;//城市id
+		required 	string				cityName			= 10;//城市名称
+		required	sint32				timezone			= 11;//时区
+		optional 	Advertisement		advertisement		= 12;//广告
+		required	string 				weatherShare		= 13;//天气分享
+		optional	Voice				voice				= 14;//语音播报
+		required	sint32				retry				= 15;//是否需要重试
+		optional    ForecastDayList	    forecastDayExtraList = 16;//未来15天预报补充数据
+		optional 	sint32				hasShort			= 17[default = 0];//是否有短时预报
+		optional 	string				cityBriefName		= 18;//城市简短名称（例如北京市朝阳区的简短名称为朝阳区）
+		optional    ForecastDayList 	forecast  			= 19;//未来15天预报
+		optional	    sint64				pCityId				= 20;//父城市id
+		optional	    sint32				isSpot				= 21;//景区标识(0表示否 1表示是)
+		optional  	sint32				country				= 22;//国家标识(0表示国内)
+		optional 	string				pCityName		    = 23;//父城市名称
+		optional    double              lon                 = 24; // 当前city的经度，非父级经纬度
+		optional    double              lat                 = 25; // 当前city的纬度，非父级经纬度
+		optional    string              ianaTimeZone        = 26; // iana时区, 类似: Asia/Shanghai, 计算 夏令时 用
+		optional    string              resType             = 27; // 资源类型，"0" 或null 表示默认资源， "1"：表示 经纬度天气资源
+		optional    string              sfcDesc             = 28; // 非定位城市，返回短时入口文案。 定位城市，无雨状态下返入口文案，有雨状态不返回。
+		optional    string              uniqCityK           = 29; // 前端POI城市搜索透传给服务端的一个key
+		optional    Radar              radar           = 30;
+
+
+		//voice
+		message Voice{
+			required 	string			domain				= 1;//域名
+			required	string			background			= 2;//背景音乐
+			required	string			sequence			= 3;//语音序列
+		}
+
+		//实况
+		message Condition {
+			required	sint32			icon				= 1;//实况描述代号
+			required 	string			condition			= 2;//实况描述
+			required	sint32			temperature			= 3;//温度
+			required 	sint32			realFeel			= 4;//体感
+			required	sint32			humidity			= 5;//湿度
+			required	sint32			pressure			= 6;//大气压
+			required	sint32			windLevel			= 7;//风级
+			required	string			windDir				= 8;//风向
+			required	string			uvi					= 9;//紫外线
+			optional	sint64			sunRise				= 10;//日出
+			optional	sint64			sunSet				= 11;//日落
+			required	string			lunarDate			= 12;//农历
+			optional	sint32			dewPoint			= 13;//露点
+			required	sint64			updatetime			= 14;//更新时间
+			required	string			tips				= 15;//温馨提示
+			required 	sint32			windSpeed			= 16;//风速
+			required	sint32			specialWeather		= 17;//是否是特殊天气
+			optional	double			windSpeeds			= 18;//客户端显示的风速
+			optional	sint32			isPort				= 19[default = 0];//是否有潮汐
+			optional 	string 			warnIcon			= 20;//异常天气推送图标
+			optional 	string			warnTitle			= 21;//异常天气推送标题
+			optional  string			warnDesc			= 22;//异常天气推送描述
+			optional 	string			warnUrl				= 23;//异常天气推送链接(预留)
+			optional 	string			weatherPush			= 24;//早晚天气推送
+			optional 	Image			  widgetBg			= 25;//widget背景
+			optional	sint32			conditionId			= 26;//实况id
+			optional 	sint32 			windDirectionId		= 27;//风向id
+			optional	sint32			weatherCode			= 28;//天气代号
+			optional	sint32			bgCode				= 29;//天气背景代号
+			optional  sint32			warnId				= 30;//异常天气推送id
+			optional  sint32			comfortId			= 31;//舒适度id
+			optional  string			warnCode			= 32;//异常天气统计代号
+			optional  sint32      vis           = 33[default = -1];//能见度，单位米，数据不存在时为-1
+			repeated  string      txtDesc       = 34; // 实况文本描述， 第1位表示实况天气描述（仅简体中文有有效数据）， 第2位 气象特殊今明天天气描述 ， 第3位 待定。
+		}
+		//天预报
+		message ForecastDayList {
+			message ForecastDay {
+				required	sint32		iconDay				= 1;//预报白天描述代号
+				required	sint32		iconNight			= 2;//预报晚上描述代号
+				required	string		conditionDay		= 3;//预报白天描述
+				required	string		conditionNight		= 4;//预报晚上描述
+				required	sint32		temperatureHigh		= 5;//预报高温
+				required	sint32		temperatureLow		= 6;//预报低温
+				required	string		windLevelDay	 	= 7;//风级白天
+				required	string		windLevelNight		= 8;//风级晚上
+				required	string		windDirDay			= 9;//风向白天
+				required	string		windDirNight		= 10;//风向晚上
+				optional	sint64		sunRise				= 11;//日出
+				optional	sint64		sunSet				= 12;//日落
+				required	sint64		predictDate			= 13;//预报日期
+				required 	sint32		windSpeedDay		= 14;//风速
+				required 	sint32		windSpeedNight		= 15;//风速
+				optional	string		limitTail			= 16;//限行尾号
+				optional	Dressing	dressing			= 17;//每日详情的衣服
+				optional	sint32		limitType			= 18;//限行类别
+				optional 	string		limitNumber			= 19;//限行描述（语音用）
+				optional 	string		windLevelDesc		= 20;//风级等级描述
+				optional 	string		windDirDesc			= 21;//风向描述
+				optional 	double 		windSpeedDays		= 22;//客户端显示的白天风速
+				optional 	double 		windSpeedNights		= 23;//客户端显示的晚上风速
+				optional 	string 		lunarDate			= 24;//农历
+				optional 	string		aqiDescription		= 25;//描述
+				optional 	sint32		aqiLevel			= 26;//等级
+				optional 	sint32		aqiValue			= 27;//数值
+				optional    string		aqiBriefDescription = 28;//简要描述
+				optional	sint32		weatherCodeDay		= 29;//白天天气代号
+				optional	sint32		weatherCodeNight	= 30;//晚上天气代号
+				optional 	string		minAqiDescription	= 31;//（范围aqi）描述
+                optional 	sint32		minAqiLevel			= 32;//（范围aqi）等级
+                optional 	sint32		minAqiValue			= 33;//（范围aqi）数值
+                optional    string		minAqiBriefDescription = 34;//（范围aqi）简要描述
+                optional 	string		maxAqiDescription	= 35;//（范围aqi）描述
+                optional 	sint32		maxAqiLevel			= 36;//（范围aqi）等级
+                optional 	sint32		maxAqiValue			= 37;//（范围aqi）数值
+                optional    string		maxAqiBriefDescription = 38;//（范围aqi）简要描述
+				optional    string		uvi                 = 39;//紫外线，文案表描
+				optional    sint32		humidity            = 40;//湿度
+				optional    sint32		pressure            = 41;//气压
+				optional    float 		pop                 = 42;//降水概率
+
+
+				message Dressing {
+					required	string	description			= 1;//描述
+					repeated	Item	item				= 2;//
+					optional	string	url					= 3;//外链广告
+					message Item {
+						required	sint32	index			= 1;//位置
+						required	Image	image			= 2;//图片
+						required	string	wapUrl			= 3;//外链地址
+					}
+				}
+			}
+
+			message Forecast40 { // 40天天气预报
+					repeated    string  desc                = 1; // 天气首页40天描述,可能有多条文案
+					required    sint32  highTemp            = 2; // 最高温度
+					required    sint32  lowTemp             = 3; // 最低温度
+					repeated    Item    items               = 4; // 每天天气的简单预报
+					message Item {
+						required 	sint32  stamp		    = 1;//时间戳，精确到秒
+						required 	sint32  temp		    = 2;//温度，整型
+						required 	sint32  weatherType	    = 3;//天气类型。0:啥都不是 1:高温 2:降雨 4:降雪
+					}
+			}
+
+			repeated	ForecastDay 	forecastDay			= 1;//天预报集合
+			required	sint64		 	updatetime			= 2;//更新时间
+			optional	Forecast40 	    forecast40			= 3;//40天预简单预报。
+
+		}
+
+		message ForecastHourList {
+			//小时预报
+			message ForecastHour {
+				required 	sint32		icon				= 1;//预报小时描述代号
+				required	string		condition			= 2;//预报小时描述
+				required	sint32		temperature			= 3;//温度
+				required	sint32		realFeel			= 4;//体感
+				required	sint32		humidity			= 5;//相对湿度
+				required	sint32		pressure			= 6;//大气压
+				required	string		windLevel			= 7;//风级
+				required	string		windDir				= 8;//风向
+				required	string		uvi					= 9;//紫外线
+				optional 	sint32 		dewPoint			= 10;//露点
+				optional 	sint32 		cloudCover			= 11;//云覆盖率
+				required	sint64		predictTime			= 12;//预报时间
+				required 	sint32		windSpeed			= 13;//风速
+				optional    sint32		aqiValue			= 14;//aqi数值
+				optional    sint32		aqiLevel			= 15;//aqi等级
+				optional    string 		aqiDesc 			= 16;//aqi描述
+				optional    string	    humidityDesc		= 17;//湿度描述
+				optional    string      windDesc 			= 18;//风力描述
+				optional 	string      temperatureDesc     = 19;//温度描述
+				optional    string      pressureDesc        = 20;//大气压描述
+				optional    float      pop           = 21;//降水概率
+			}
+			repeated	ForecastHour 	forecastHour  		= 1;//小时预报集合
+			required 	sint64		  	updatetime			= 2;//更新时间
+			optional    sint32			hasAqi				= 3[default=0];//
+			optional    string			desc				= 4;//  24小时天气描述
+		}
+
+		message IndexList {
+			//生活指数
+			message Index {
+				required 	string  	description 		= 1;//指数描述
+				required 	string  	title 				= 2;//指数标题
+				required 	sint32  	code 				= 3;//指数代号
+				optional 	string  	url					= 4;//指数链接
+				optional 	string  	iconUrl				= 5;//图标链接
+				required 	string  	recommend			= 6;//指数建议
+				optional	sint32		levelId 			= 7[default=0];//指数级别id
+			}
+			repeated 	Index 			index				= 1;//指数集合
+			required 	sint64 			updatetime			= 2;//更新时间
+		}
+
+		//avatar
+		message Avatar {
+			required 		sint32    	avatarId			= 1;//avatar的id
+			optional 		sint32     	type				= 2[default=0];//叠加(1)or替换(0)
+			repeated 		Layer     	layer				= 3;//avatar图层
+			repeated 		Word 	   	word 				= 4;//avatar话语
+			repeated 		Animation 	animation			= 5;//avatar动画
+			required 		sint64	   	updatetime			= 6;//更新时间
+			repeated		Assist		assist				= 7;//avatar道具
+			optional 		sint64		id					= 8;//avatar广告id
+			optional 		Equip		equip 				= 9;//avatar装备
+			optional		string      skinName            = 10;//表示某个温度下服装标识
+			optional        sint32      repeat              = 11;//动画组是否循环(动画组循环则单个动画不循环)
+			repeated        DynamicAnimations  dynamicAnimations  = 12;//执行的动画组
+			repeated        sint32      delay               = 13;//动画组播放延迟时间
+			repeated        Slots       slots               = 14;//插槽集合
+            optional        sint32      delayTime           = 15;//循环时最后一个动画回到第一个动画时的时间
+            repeated        Interaction interaction         = 16;//交互动画
+
+
+            message Interaction {
+				optional   string      boundName        = 1;//交互动画名称
+				repeated   string      boundValue       = 2;//交互动画值
+			}
+
+			message Slots {
+				optional   string      skin                = 1;//道具所在皮肤名
+				optional   string      slot                = 2;//插槽节点名
+				optional   string      name                = 3;//装备名
+			}
+
+			message DynamicAnimations {
+				optional    string      name                = 1;//动画名称
+				optional    sint32      repeat              = 2;//是否循环执行
+				optional    sint32      random              = 3;//是否随机播放
+				optional    sint32      isSurprise          = 4;//是否为彩蛋动画
+			}
+
+			message Layer {
+				required 	sint32   	position	  		= 1;//图层
+				required 	string  	code	 		    = 2;//图片代号
+				optional 	string		callback			= 3;//图层曝光
+				optional 	string		clickCallback		= 4;//点击曝光
+			}
+
+			message Word {
+				required 	string  	description 		= 1;//内容
+				optional 	string  	url 	  			= 2;//外链
+				optional	string 		entry				= 3;//入口文字
+				optional 	sint32		order				= 4;//排序
+				optional	sint32		type				= 5[default=0];//url打开类型0内部1外部
+				optional    string		callback			= 6;//url回调参数
+				optional    string		wordCallback		= 7;//word回调参数
+			}
+
+			message Animation {
+				required 	sint32   	position			= 1;//动画位置
+				required 	sint32   	duration  			= 2;//动画时间
+				required 	sint32   	interval  			= 3;//动画间隔
+				repeated 	AnimaStep 	animaStep 			= 4;//动画步骤
+				message AnimaStep {
+					required sint32   	order	  			= 1;//次序
+					required string	 	code	  			= 2;//图片代号
+				}
+			}
+
+			message Assist {
+				optional   string		image				= 1;//道具图片
+				optional   string		setting				= 2;//资源配置
+				optional   string		url					= 3;//道具外链
+				optional   string		callback			= 4;//url回调参数
+				optional   string		imgCallback         = 5;//图片曝光回调
+				optional   sint32       type                = 6[default=0];//url打开类型0内部1外部
+			}
+
+			message Equip {
+				optional   string		head				= 1[default=""];//头部
+				optional   string		upper				= 2[default=""];//衣服
+				optional   string		hand				= 3[default=""];//手部
+				optional   string		lower				= 4[default=""];//下肢
+				optional   string		foot  				= 5[default=""];//足部
+			}
+		}
+		//alert
+		message AlertList{
+			message DefenseGuide{
+				required    sint32      id                  =1;// noticeID
+				required    string      name                =2;// noticeName
+				required    string      icon                =3;// icon 的url下载地址
+			}
+
+			message Alert {
+				required 	string    	icon			 	= 1;//预警icon
+				required 	string    	content	     		= 2;//预警信息
+				required 	string    	name 		 		= 3;//预警标题
+				required 	sint32    	level		 		= 4;//预警级别
+				required 	sint64    	publishTime   		= 5;//发布时间
+				required 	sint64    	reliveTime	 		= 6;//预警结束时间
+				optional 	string		publishSector 		= 7;//发布单位
+				required	string		iconDesc			= 8;//icon描述
+				required	sint64		id					= 9;//预警id
+				repeated	sint32		notices				= 10;//预警图标提醒
+				optional    sint32      alertTypeId         = 11; // 预警类型ID 对应 alert_info 表的Fid 字段
+				repeated	DefenseGuide defenseGuide		= 12;// 防御指南
+			}
+
+			repeated 		Alert  		alert				= 1;//预警的集合
+			required 		sint64		updatetime			= 2;//更新时间
+			required		sint32		forceUpdate			= 3;//是否覆盖(0:no1:yes)
+		}
+		//空指
+		message AQI{
+			required		sint32		value				= 1;//空指数值
+			required		sint32		level				= 2;//空指级别
+			required		string		description			= 3;//空指描述
+			required		sint64		updatetime			= 4;//更新时间
+			required 		sint32		forceUpdate			= 5;//强制更新
+			optional 		string		tips			= 6;//空气质量提示 https://docs.matrixback.com/pages/viewpage.action?pageId=22660798
+		}
+		//广告
+		message Advertisement {
+			required	sint64			updatetime			= 1;//更新时间
+			repeated 	Ad				ad					= 2;//广告列表
+			optional 	Avatar			avatar				= 3;//avatar的广告
+			required	sint32			avatarForceUpdate   = 4;//是否覆盖(0:no1:yes)
+			message Ad{
+				required	string 		position			= 1;//位置
+				optional	Item		item				= 2;//广告
+				required	sint32		forceUpdate			= 3;//是否覆盖(0:no1:yes)
+				required	sint64 	   	endTime				= 4;//广告结束时间
+				required	sint64		startTime			= 5;//广告开始时间
+				message Item{
+					optional	sint32		type			= 1;//类型(跳转H5 or native)
+					optional	string		title			= 2;//title
+					optional	string		description		= 3;//描述
+					optional  	string		icon			= 4;//icon
+					optional 	Image		image			= 5;//图片
+					optional    string		url				= 6;//入口
+					optional	sint32		showType		= 7[default=2];//展示类型
+					required 	sint64		id				= 8;//广告id
+					optional	string		callback		= 9;//回调参数
+					optional 	string		iconCallback    = 10;//icon回调参数
+				}
+			}
+		}
+	}
+	message Image {
+		required string		image							= 1;//图片链接
+		required sint32		width							= 2[default=0];//宽度
+		required sint32		height							= 3[default=0];//高度
+		optional string     callback						= 4;//回调参数
+		optional string		callbackClose					= 5;//关闭回调参数
+	}
+	//节假日
+	message FestivalList{
+		message Festival{
+			required	sint64		date					= 1;//节日日期
+			required	string		name					= 2;//节日名称
+			optional	string		url						= 3;//节日外链
+			optional 	string 		content					= 4;//节日祝福语
+			optional 	string		icon					= 5;//icon
+			optional 	sint32		type					= 6;//跳转类型
+			optional 	sint32		show					= 7;//首页是否展示
+			optional 	sint32		push 					= 8;//是否推送
+			optional	string		pushIcon				= 9;//推送的图标
+			optional	string		pushTitle				= 10;//推送的title
+		}
+		repeated		Festival	festival				= 1;//节假日
+		required		sint64		updatetime				= 2;//更新时间戳
+	}
+	//splash
+	message SplashList {
+		message Splash {
+			required Image 	  			image					= 1;//splash图片
+			required sint64				timeStart				= 2;//开始时间
+			required sint64				timeEnd					= 3;//结束时间
+			required sint32				duration				= 4[default = 1000];//显示时间
+			required sint32				priority				= 5;//优先级
+			required sint32				showTimes				= 6;//展示次数
+			required string				name					= 7;//splash名称
+			optional string				url  					= 8;//访问url
+			optional sint32				type					= 9;//url跳转类型
+			optional string				callback				= 10;//回调参数
+			optional string				imgCallback				= 11;//splash回调参数
+			optional sint64				id						= 12;//splash广告id
+			optional sint32				net  					= 13[default=0];//网络类型控制，默认0:wifi，1:wifi+3G4G
+		}
+		repeated 	Splash				splash					= 1;//splash集合
+		required 	sint64				updatetime				= 2;//更新时间戳
+		required	sint32				forceUpdate				= 3;//是否覆盖(0:no 1:yes)
+	}
+
+    // 短处雷达数据部分精简返回
+	message Radar {
+		message Percent{
+			optional double              percent                = 1;
+			optional sint64              timestamp              = 2;
+		}
+
+		message ConfirmInfo{
+			optional sint32 isConfirm                           = 1;
+			optional sint32 confirmType                         = 2;
+			optional sint32 confirmIcon                         = 3;
+			optional string confirmIconDesc                     = 4;
+			optional string tip                                 = 5;
+		}
+		required sint32 rtCode                                  = 1;   // 0 正确， 其他数据获取失败
+		required string rtMsg                                   = 2;   // 返回的信息
+        optional string content                                 = 3;
+        optional string banner                                  = 4;
+        optional string tips                                    = 5;
+        optional string noRainBanner                            = 6;
+        optional string noRainContent                           = 7;
+        optional sint32 rain                                    = 8;
+        optional sint32 type                                    = 9;
+        optional double nearRainLat                             = 10;
+        optional double nearRainLon                             = 11;
+        optional sint64 timestamp                               = 12;
+        optional ConfirmInfo confirmInfo                        = 13;
+        repeated Percent percent                                = 14;
+		    repeated double adaptionZoom                            = 15;  // 短时自适应窗口大小[左上lon,左上lat,右下lon,右下lat]
+		    optional sint32 showPageNo                              = 16;   //0或者未下发该值:降雨页面,1:显示风粒子页面,2:显示温度页面,3:气压页面
+	}
+}
+

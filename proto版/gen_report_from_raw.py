@@ -2,39 +2,43 @@
 # -*- coding: utf-8 -*-
 """
 从已拉取的原始JSON复现均值报告（验证数据加工逻辑，不用等定时任务跑满48次）
-选最近N份原始json -> build_points -> merge_pull -> average_all -> gen_xlsx + csv + html + md
+选最近N份原始拉取 -> build_points -> merge_pull -> average_all -> gen_xlsx + csv + html + md
 
-加工链路与 scheduled_compare.py 完全一致，只是数据源从"实时拉接口"换成"读已存的原始json"。
-定时任务每跑一次都会留底 原始json_<时间戳>/<城市>_<时间戳>/国内.json + 国际.json，
-本脚本读这些留底复现，可在定时任务跑满前就验证 build_points/merge/average/gen_xlsx 整条链路是否正确。
+数据源: data/原始拉取/原始_<时间戳>/<城市>/国内.json + 国际.json（raw_pull.py 拉取留底）
+加工链路与 scheduled_compare.py 完全一致，只是手动取最近N份一次性出报告（不用等定时任务攒满）。
+raw_pull 每跑一轮都留底 原始拉取/原始_<时间戳>/<城市>/，本脚本读这些留底复现均值报告。
 
 运行:
-  python3 gen_report_from_raw.py          # 用全部已有原始json做均值
+  python3 gen_report_from_raw.py          # 用全部已有原始拉取做均值
   python3 gen_report_from_raw.py 6        # 取最近6份做均值
+  python3 gen_report_from_raw.py 45       # 取最近45份做均值
 """
 import os, sys, glob, json, subprocess
 import reformat_threshold as rt
 import scheduled_compare as sc
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-OUT_DIR = rt.OUT_DIR
+OUT_DIR = rt.OUT_DIR                       # data/比对结果
+RAW_PULL_DIR = os.path.join(os.path.dirname(OUT_DIR), '原始拉取')   # data/原始拉取 (raw_pull留底)
 
 
 def load_raw_pulls(cities):
-    """扫描所有 原始json_<时间戳> 目录，每份用 build_points 重建points，返回 [(时间戳, pts), ...]"""
-    raw_dirs = sorted(glob.glob(os.path.join(OUT_DIR, '原始json_*')))
+    """扫描 data/原始拉取/原始_<时间戳>/<城市>/ 目录，每份用 build_points 重建points，返回 [(时间戳, pts), ...]"""
+    raw_dirs = sorted(glob.glob(os.path.join(RAW_PULL_DIR, '原始_*')))
     pulls = []
     for rd in raw_dirs:
-        ts = os.path.basename(rd).replace('原始json_', '')
+        ts = os.path.basename(rd).replace('原始_', '')
         pts = []
         for name, lon, lat in cities:
-            city_dirs = glob.glob(os.path.join(rd, f'{name}_*'))
-            if not city_dirs:
+            cn_path = os.path.join(rd, name, '国内.json')
+            intl_path = os.path.join(rd, name, '国际.json')
+            if not (os.path.exists(cn_path) and os.path.exists(intl_path)):
                 continue
-            cd = city_dirs[0]
             try:
-                cn = json.load(open(os.path.join(cd, '国内.json'), encoding='utf-8'))
-                intl = json.load(open(os.path.join(cd, '国际.json'), encoding='utf-8'))
+                cn = json.load(open(cn_path, encoding='utf-8'))
+                intl = json.load(open(intl_path, encoding='utf-8'))
+                if isinstance(intl, dict) and 'data' in intl and 'current' not in intl:
+                    intl = intl['data']   # raw_pull存完整响应{code,data,msg}, 提取data给build_points
                 pts += rt.build_points(name, cn, intl, strict=False)
             except Exception as e:
                 print(f'  跳过 {name}: {e}')
@@ -46,11 +50,11 @@ def load_raw_pulls(cities):
 def main():
     n = int(sys.argv[1]) if len(sys.argv) > 1 else 0  # 0=全部已有
     cities = rt.load_cities()
-    print(f"扫描已拉取的原始JSON留底...")
+    print(f"扫描 raw_pull 留底: {RAW_PULL_DIR}")
     pulls = load_raw_pulls(cities)
     print(f"找到 {len(pulls)} 份拉取: {', '.join(p[0] for p in pulls)}")
     if not pulls:
-        print("❌ 未找到原始JSON，请确认 data/比对结果/原始json_* 目录存在（定时任务需开启 keep_raw）")
+        print(f"❌ 未找到原始拉取，请确认 {RAW_PULL_DIR}/原始_* 目录存在（需先跑 raw_pull.py 拉取）")
         return
     if n and n < len(pulls):
         pulls = pulls[-n:]
@@ -75,10 +79,10 @@ def main():
     csv_path = os.path.join(OUT_DIR, f'数据明细_均值_{tag}.csv')
 
     extra = [
-        f'本报告从已拉取的原始JSON留底复现（验证加工逻辑）: 取 {avg_count} 份原始JSON做均值',
+        f'本报告从 raw_pull 留底复现（验证加工逻辑）: 取 {avg_count} 份原始拉取做均值',
         f'采样窗口: {window_start} ~ {window_end}',
+        '数据源: data/原始拉取/原始_<ts>/<城市>/国内.json + 国际.json (raw_pull.py 拉取)',
         '加工链路与 scheduled_compare.py 完全一致（build_points -> merge_pull -> average_all -> gen_xlsx）',
-        '区别: scheduled_compare 实时拉接口，本脚本读已存原始JSON',
     ]
     n2 = rt.gen_xlsx(threshold_pts, f'阈值口径({avg_count}次均值)', xlsx_path, extra_notes=extra)
     print(f"\n✅ xlsx: {os.path.basename(xlsx_path)} ({n2} 数据点)")

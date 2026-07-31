@@ -6,6 +6,7 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_CONFIG_PATH = os.environ.get('CONFIG_PATH') or os.path.join(SCRIPT_DIR, 'compare_config.yaml')
 JSON_DIR = os.path.join(SCRIPT_DIR, '..', 'data', '比对结果', '原始JSON')
 XLSX = os.path.join(SCRIPT_DIR, '..', 'data', '比对结果', '一致性比对报告.xlsx')
 
@@ -28,7 +29,7 @@ def text_diff(cv, iv):
 
 # 降水量等级规则从 compare_config.yaml 读取（与主流程同源）
 import yaml as _yaml
-_CONF = _yaml.safe_load(open(os.path.join(SCRIPT_DIR, 'compare_config.yaml'), encoding='utf-8'))
+_CONF = _yaml.safe_load(open(_CONFIG_PATH, encoding='utf-8'))
 _RAW = _CONF.get('rain_thresholds', {})
 RAIN_TH = [(float('inf'), n) if th in ('~', None) else (float(th), n) for n, th in _RAW.items()]
 RAIN_TH.sort(key=lambda x: x[0])

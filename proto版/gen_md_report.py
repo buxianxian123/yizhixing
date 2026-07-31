@@ -16,7 +16,7 @@ import openpyxl
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE = os.path.join(SCRIPT_DIR, '..', 'data')
 OUT_DIR = os.path.join(BASE, '比对结果')
-CONFIG_PATH = os.path.join(SCRIPT_DIR, 'compare_config.yaml')
+CONFIG_PATH = os.environ.get('CONFIG_PATH') or os.path.join(SCRIPT_DIR, 'compare_config.yaml')
 
 FIELD_ORDER = ['温度', '体感温度', '湿度', '风速', '气压', '天气现象', '降水量',
                '温度(最高)', '温度(最低)', '体感温度(白天)', '体感温度(夜间)',
@@ -144,13 +144,23 @@ def parse_sample(xlsx):
 
     def fmt(s):  # 20260721_1639 -> 2026-07-21 16:39
         return f"{s[0:4]}-{s[4:6]}-{s[6:8]} {s[9:11]}:{s[11:13]}"
-    m = re.search(r'(\d+)次均值_(\d{8}_\d{4})-(\d{8}_\d{4})', name)
+    m = re.search(r'(\d+)次均值_(\d{8}_\d{4,6})-(\d{8}_\d{4,6})', name)
     if m:
         return f"{fmt(m.group(2))} ~ {fmt(m.group(3))}，{m.group(1)} 次均值"
-    m2 = re.search(r'(\d{8}_\d{4})-(\d{8}_\d{4})', name)
+    m2 = re.search(r'(\d{8}_\d{4,6})-(\d{8}_\d{4,6})', name)
     if m2:
         return f"{fmt(m2.group(1))} ~ {fmt(m2.group(2))}"
     return '单次拉取（非均值）'
+
+def parse_window_end(xlsx):
+    """从xlsx文件名解析采样窗口结束时间(数据截止), 如 2026-07-29 10:36; 无窗口返回当前时间"""
+    import re
+    m = re.search(r'(\d{8}_\d{4,6})-(\d{8}_\d{4,6})', os.path.basename(xlsx))
+    if m:
+        s = m.group(2)
+        return f"{s[0:4]}-{s[4:6]}-{s[6:8]} {s[9:11]}:{s[11:13]}"
+    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+
 
 
 # =========================================================
@@ -254,7 +264,7 @@ def build_md(summary, top5, thresholds, rain_th, meta):
 
 ## 一、测试结论
 
-　　本次测试覆盖 {meta['cities']} 个城市 × {meta['avg_count']} 份拉取（共 {meta['cities']*meta['avg_count']} 个采样点），具体一致率统计如下表。
+　　本次测试覆盖 {meta['cities']} 个城市 （共 {meta['cities']*meta['avg_count']} 个采样点），具体一致率统计如下表。
 
 | 模块 | 数据点 | """ + ' | '.join(c[0] for c in FIELD_CATS) + f""" |
 |---|---|""" + '|'.join(['---']*len(FIELD_CATS)) + f""" |
@@ -291,9 +301,9 @@ def build_md(summary, top5, thresholds, rain_th, meta):
         md += f"- 气压在高原城市存在系统性偏差，最大可达 {fmt_num(pres_max['maxDev'], '气压')}（{pres_max['maxCity'] or ''}）\n"
     md += '\n---\n'
 
-    # ---- 二、阈值配置 ----
+    # ---- 二、评测规则 ----
     md += """
-## 二、阈值配置
+## 二、评测规则
 
 **数值字段：**
 
@@ -302,7 +312,8 @@ def build_md(summary, top5, thresholds, rain_th, meta):
 """
     for k, v in thresholds.items():
         md += f"| {k} | ≤ {v}{unit(k)} |\n"
-    md += """
+    if rain_th:
+        md += """
 **降水量字段：**
 
 等级比对规则：
@@ -310,15 +321,17 @@ def build_md(summary, top5, thresholds, rain_th, meta):
 | 等级 | 降水量区间 (mm) |
 |---|---|
 """
-    prev = 0
-    for name, th in rain_th.items():
-        ub = f"{th}" if th not in ('~', None) else '∞'
-        md += f"| {name} | [{prev}, {ub}) |\n"
-        if th not in ('~', None):
-            prev = th
-    md += """
+        prev = 0
+        for name, th in rain_th.items():
+            ub = f"{th}" if th not in ('~', None) else '∞'
+            md += f"| {name} | [{prev}, {ub}) |\n"
+            if th not in ('~', None):
+                prev = th
+        md += """
 *比对方式：国内值/海外值分别映射到降水量等级，等级相同即判一致。*
 
+"""
+    md += """
 **天气现象字段：**
 
 采用语义映射五分制评分，偏差计算规则如下：
@@ -413,7 +426,7 @@ def main():
     avg_count = int(_am.group(1)) if _am else 1
 
     meta = {
-        'time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M'),
+        'time': parse_window_end(xlsx),
         'source': os.path.basename(xlsx),
         'koujing': koujing,
         'cities': cities,

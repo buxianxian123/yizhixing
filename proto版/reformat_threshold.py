@@ -9,6 +9,7 @@ import yaml
 import openpyxl
 from openpyxl.styles import Font, PatternFill
 from collections import defaultdict
+from fetch_cn_pb import fetch_cn_pb, normalize_cn, normalize_in   # 国内 proto detail + pb->旧结构 + 海外补ts
 
 # ====== 接口鉴权配置 ======
 PASSWORD_CN = '49ff9a4e5e8bd5e8ce9e057c5adc5d2d'
@@ -26,7 +27,7 @@ CITY_RANK = {}  # 城市序号，偏差相同时偏远地区优先
 CSV_PATH = os.path.join(OUT_DIR, f'数据明细_{TIMESTAMP}.csv')
 XLSX_STRICT = os.path.join(OUT_DIR, f'一致性比对报告_严格相等_{TIMESTAMP}.xlsx')
 XLSX_THRESHOLD = os.path.join(OUT_DIR, f'一致性比对报告_阈值口径_{TIMESTAMP}.xlsx')
-CONFIG_PATH = os.path.join(SCRIPT_DIR, 'compare_config.yaml')
+CONFIG_PATH = os.environ.get('CONFIG_PATH') or os.path.join(SCRIPT_DIR, 'compare_config.yaml')
 
 # ====== 读取阈值配置 ======
 config = yaml.safe_load(open(CONFIG_PATH, encoding='utf-8'))
@@ -86,8 +87,10 @@ def fetch(url, retry=2):
     return None
 
 def fetch_city(name, lon, lat):
-    """拉单个城市的国内+国际数据，任一失败对应项为 None。供一次性脚本和定时脚本复用"""
-    cn_data = fetch(cn_url(lat, lon))
+    """拉单个城市的国内+国际数据，任一失败对应项为 None。供一次性脚本和定时脚本复用
+    国内: proto detail 接口(POST, pb 二进制), fetch_cn_pb 返回 pb 完整 dict(含 detail, 存原始用)
+    海外: moweather json 接口, 不变"""
+    cn_data = fetch_cn_pb(lon, lat)
     in_data = fetch(in_url_full(lat, lon))
     return cn_data, in_data
 
@@ -229,7 +232,12 @@ def cmp_point(city, module, field, ts, cnv, iv, spec, period='', strict=False):
     return (city, module, field, ts, cv, iv_conv, diff, ok, note, period)
 
 def build_points(city, cn, ind, strict=False):
-    """遍历所有模块/字段，返回该城市比对数据点列表"""
+    """遍历所有模块/字段，返回该城市比对数据点列表
+    cn 若是国内 proto detail 的 pb 完整 dict(含 detail key), 先 normalize 成旧结构再比对"""
+    if cn and isinstance(cn, dict) and 'detail' in cn:
+        cn = normalize_cn(cn)
+    if ind:
+        ind = normalize_in(ind)
     P = []
     for module, mspec in MODULES.items():
         source = mspec['source']; fields = mspec['fields']
@@ -237,9 +245,20 @@ def build_points(city, cn, ind, strict=False):
             cn_arr = cn.get(source, [])[:mspec.get('limit', 99)]
             ind_arr = ind.get(source, [])[:mspec.get('limit', 99)]
             ts_key = mspec.get('ts_key'); lim = mspec.get('limit', 99)
-            for k in range(min(len(cn_arr), len(ind_arr), lim)):
-                a = cn_arr[k]; b = ind_arr[k]
-                ts = a.get(ts_key, f'第{k+1}') if ts_key else f'第{k+1}'
+            # 按时次字符串匹配对齐(国内 predict_time/predict_date 已转字符串, 海外由 normalize_in 补)
+            ind_map = {}
+            for b in ind_arr:
+                ts = b.get(ts_key)
+                if ts is not None:
+                    ind_map[ts] = b
+            matched = []
+            for a in cn_arr:
+                ts = a.get(ts_key)
+                if ts is not None and ts in ind_map:
+                    matched.append((ts, a, ind_map[ts]))
+                if len(matched) >= lim:
+                    break
+            for k, (ts, a, b) in enumerate(matched):
                 period = get_period_label(source, k)
                 for field, spec in fields.items():
                     P.append(cmp_point(city, module, field, ts, a.get(spec['cn']), b.get(spec['intl']), spec, period, strict))

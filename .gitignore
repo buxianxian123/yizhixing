@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 比对结果/
+原始拉取/
 一致性比对报告_*.md
 *.xlsx
 *.csv
@@ -12,3 +13,5 @@ data/样式参考.pdf
 国内天气现象接口.pdf
 utils/echarts.min.js
 .claude/
+原始拉取_json/
+raw_pull.log

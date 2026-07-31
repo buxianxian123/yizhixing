@@ -20,8 +20,18 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE = os.path.join(SCRIPT_DIR, '..', 'data')
 OUT_DIR = os.path.join(BASE, '比对结果')
 ECHARTS_PATH = os.path.join(SCRIPT_DIR, 'echarts.min.js')
-CONFIG_PATH = os.path.join(SCRIPT_DIR, 'compare_config.yaml')
+CONFIG_PATH = os.environ.get('CONFIG_PATH') or os.path.join(SCRIPT_DIR, 'compare_config.yaml')
 TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%H%M')
+
+def parse_window_end(xlsx):
+    """从xlsx文件名解析采样窗口结束时间(数据截止), 如 2026-07-29 10:36; 无窗口返回当前时间"""
+    import re
+    m = re.search(r'(\d{8}_\d{4,6})-(\d{8}_\d{4,6})', os.path.basename(xlsx))
+    if m:
+        s = m.group(2)
+        return f"{s[0:4]}-{s[4:6]}-{s[6:8]} {s[9:11]}:{s[11:13]}"
+    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+
 
 MODULES_DISPLAY = {'实况': '实况', '24小时': '24小时', '15天': '15天', 'AQI模块': 'AQI'}
 PERIODS = ['短时效(1-6h)', '中时效(7-12h)', '长时效(13-24h)']
@@ -469,9 +479,7 @@ td.top5{background:var(--top5)}
     <h4>一、一致判定阈值（数值字段）</h4>
     <table><thead><tr><th>字段</th><th>一致判定阈值</th></tr></thead><tbody>__TH_ROWS__</tbody></table>
     <p>差异 = 国内值 − 海外值；正数表示国内 &gt; 海外，负数表示国内 &lt; 海外。缺数据不计入一致率分母。</p>
-    <h4>二、降水量等级比对</h4>
-    <p>降水量不设数值阈值，采用等级比对：国内值/海外值分别映射到降水量等级，等级相同即判一致。规则来自 <code>compare_config.yaml → rain_thresholds</code>：</p>
-    <table><thead><tr><th>等级</th><th>降水量区间 (mm)</th></tr></thead><tbody>__RAIN_ROWS__</tbody></table>
+    __RAIN_SECTION__
     <h4>三、天气现象语义映射（五分制）</h4>
     <ul>
       <li><b>5分</b> 主天气一致+量级一致 -> 完全匹配（唯一算"一致"）</li>
@@ -1080,6 +1088,10 @@ initAll();
     html = html.replace('__CITIES__', str(meta['cities']))
     html = html.replace('__POINTS__', str(meta['points']))
     html = html.replace('__TH_ROWS__', th_rows)
+    rain_section = """    <h4>二、降水量等级比对</h4>
+    <p>降水量不设数值阈值，采用等级比对：国内值/海外值分别映射到降水量等级，等级相同即判一致。</p>
+    <table><thead><tr><th>等级</th><th>降水量区间 (mm)</th></tr></thead><tbody>__RAIN_ROWS__</tbody></table>""" if rain_th else ''
+    html = html.replace('__RAIN_SECTION__', rain_section)
     html = html.replace('__RAIN_ROWS__', rain_rows)
     return html
 
@@ -1121,7 +1133,7 @@ def main():
         pass
 
     meta = {
-        'time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M'),
+        'time': parse_window_end(xlsx),
         'source': base_xlsx,
         'koujing': koujing,
         'cities': cities,

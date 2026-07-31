@@ -1,28 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-定时均值比对（常驻脚本）
-每 interval_seconds 秒全量拉一次 -> 累积；攒满 avg_count 次后取平均 -> 出一份均值报告。
+定时均值比对（常驻脚本，读留底不拉接口）
+每 interval_seconds 秒扫一次 data/原始拉取/ 的新轮 -> 累积；攒满 avg_count 次后取平均 -> 出一份均值报告。
 数值字段取均值、天气现象取众数，再跑一次比对，报告格式与一次性脚本一致，只是数据更稳。
+
+⚠️ 本脚本不拉接口！原始数据由 raw_pull.py 拉取存到 data/原始拉取/，本脚本读这些留底攒均值。
+   需先跑 raw_pull.py 持续拉取: nohup python3 proto版/raw_pull.py > raw_pull.log 2>&1 &
+   手动取最近N份出报告(不等攒满): python3 proto版/gen_report_from_raw.py 45
+
 运行: python3 scheduled_compare.py   (Ctrl-C 优雅停止，状态落盘可续跑)
 配置: compare_config.yaml -> schedule 段
 """
-import os, sys, csv, json, time, datetime
+import os, sys, csv, json, time, datetime, glob
 from collections import Counter
 
-import reformat_threshold as rt   # 复用 fetch_city/load_cities/build_points/gen_xlsx/calc_weather_deviation/get_threshold
+import reformat_threshold as rt   # 复用 build_points/load_cities/gen_xlsx/calc_weather_deviation/get_threshold/MODULES
 
 # ====== 路径配置 ======
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = rt.OUT_DIR                       # data/比对结果
 STATE_PATH = os.path.join(OUT_DIR, '.均值累积状态.json')
-RAW_DIR = os.path.join(OUT_DIR, '原始JSON_均值')
+RAW_PULL_DIR = os.path.join(os.path.dirname(OUT_DIR), '原始拉取')   # data/原始拉取 (raw_pull留底)
 
-# ====== 读调度配置（支持环境变量覆盖，便于小窗口测试，不设则用配置值）======
+# ====== 读调度配置（支持环境变量覆盖，便于小窗口测试）======
 SCHED = rt.config['schedule']
 INTERVAL = int(os.environ.get('SC_INTERVAL', SCHED['interval_seconds']))
 AVG_COUNT = int(os.environ.get('SC_AVG_COUNT', SCHED['avg_count']))
-KEEP_RAW = SCHED.get('keep_raw', True)
 MAX_WINDOWS = int(os.environ.get('SC_MAX_WINDOWS', '0'))   # 0=无限循环; >0=跑满N个窗口后退出
 
 
@@ -31,40 +35,38 @@ def now_str():
 
 
 # =========================================================
-# 第一部分：单次拉取 + 累积
+# 第一部分：扫描 raw_pull 留底的新轮 + 累积
 # =========================================================
 
-def pull_once(cities, out_dir, pull_n):
-    """全量拉一次。返回 (points列表, 成功城数, 跳过城数)。
-    原始JSON完整保存(不加工)：原始json_{时间戳}/{城市}_{时间戳}/国内.json + 国际.json。
-    points 未合并进累积器，由调用方在整次拉取成功后合并（中断可丢弃，不污染累积器）"""
-    pts_all = []
-    ok = 0; skip = 0
-    ts = now_str()
-    raw_top = os.path.join(out_dir, f'原始json_{ts}')
-    for idx, (name, lon, lat) in enumerate(cities, 1):
-        cn_data, in_data = rt.fetch_city(name, lon, lat)
-        if cn_data is None:
-            skip += 1
-            print(f"  [{idx}/{len(cities)}] ⏭️ {name} 国内接口失败, 跳过")
+def scan_new_pulls(cities, last_ts):
+    """扫 data/原始拉取/ 下 ts > last_ts 的新轮，每轮 build_points，返回 [(ts, pts), ...]。
+    last_ts=None 时扫全部已有轮。原始数据由 raw_pull.py 拉取留底，本函数只读不拉"""
+    raw_dirs = sorted(glob.glob(os.path.join(RAW_PULL_DIR, '原始_*')))
+    new_pulls = []
+    for rd in raw_dirs:
+        ts = os.path.basename(rd).replace('原始_', '')
+        if last_ts and ts <= last_ts:
             continue
-        if in_data is None:
-            skip += 1
-            print(f"  [{idx}/{len(cities)}] ⏭️ {name} 国际接口失败, 跳过")
-            continue
-        if KEEP_RAW:
-            city_dir = os.path.join(raw_top, f'{name}_{ts}')
-            os.makedirs(city_dir, exist_ok=True)
-            with open(os.path.join(city_dir, '国内.json'), 'w', encoding='utf-8') as f:
-                json.dump(cn_data, f, ensure_ascii=False)
-            with open(os.path.join(city_dir, '国际.json'), 'w', encoding='utf-8') as f:
-                json.dump(in_data, f, ensure_ascii=False)
-        # build_points 一次即可：strict 只影响 ok/diff，cn/iv 原值两种口径相同
-        pts_all += rt.build_points(name, cn_data, in_data, strict=False)
-        ok += 1
-        if idx % 10 == 0 or idx == len(cities):
-            print(f"  [{idx}/{len(cities)}] {name} ✅")
-    return pts_all, ok, skip
+        pts = []
+        ok = 0
+        for name, lon, lat in cities:
+            cn_path = os.path.join(rd, name, '国内.json')
+            intl_path = os.path.join(rd, name, '国际.json')
+            if not (os.path.exists(cn_path) and os.path.exists(intl_path)):
+                continue
+            try:
+                cn = json.load(open(cn_path, encoding='utf-8'))
+                intl = json.load(open(intl_path, encoding='utf-8'))
+                if isinstance(intl, dict) and 'data' in intl and 'current' not in intl:
+                    intl = intl['data']   # raw_pull存完整响应{code,data,msg}, 提取data给build_points
+                pts += rt.build_points(name, cn, intl, strict=False)
+                ok += 1
+            except Exception:
+                pass
+        if pts:
+            new_pulls.append((ts, pts))
+            print(f"  纳入轮次 {ts} ({ok} 城, {len(pts)} 数据点)")
+    return new_pulls
 
 
 def merge_pull(acc, pts):
@@ -132,7 +134,6 @@ def average_all(acc, avg_count):
             in_lv = rt.RAIN_NAMES[il] if il is not None else '?'
             note = f'国内{cn_lv} vs 海外{in_lv}({count}次均值)'
             pt = (city, module, field, ts, avg_cn, avg_iv, avg_diff, ok, note, period)
-            # 降水量等级比对与阈值无关，严格/阈值两种口径结果相同
             strict_pts.append(pt); threshold_pts.append(pt)
         else:
             # numeric / wind（wind 的 iv 已是 ÷3.6 后的 m/s，均值后直接相减）
@@ -181,12 +182,12 @@ def emit_reports(acc, avg_count, window_start, window_end):
     csv_path = os.path.join(csv_dir, f'数据明细_均值_{tag}.csv')
 
     extra = [
-        f'本报告为定时均值比对: 每 {INTERVAL}s 拉一次, 攒满 {avg_count} 次取平均后比对',
+        f'本报告为定时均值比对: 每 {INTERVAL}s 扫一次留底, 攒满 {avg_count} 次取平均后比对',
         f'采样窗口: {window_start} ~ {window_end}',
+        '数据源: data/原始拉取/原始_<ts>/<城市>/国内.json + 国际.json (raw_pull.py 拉取留底, 本脚本只读不拉)',
         '数值字段: 多次国内值/海外值分别取均值后比对',
         '天气现象: 取众数(最常出现)后按语义映射比对',
         '风速: 海外值已是 ÷3.6 换算后的 m/s, 均值后直接相减',
-        '原始JSON留底: data/比对结果/原始json_<拉取时间戳>/<城市>_<时间戳>/国内.json + 国际.json（完整不加工）',
     ]
 
     n1 = rt.gen_xlsx(strict_pts, f'严格相等({avg_count}次均值)', xlsx_strict, extra_notes=extra)
@@ -229,11 +230,12 @@ def openpyxl_load(path):
 # 第四部分：状态落盘 / 续跑
 # =========================================================
 
-def save_state(acc, pulls_done, window_start):
-    """累积器落盘，防崩溃丢窗口"""
+def save_state(acc, pulls_done, window_start, last_ts):
+    """累积器 + last_ts 落盘，防崩溃丢窗口。last_ts 记录已纳入的最新留底轮次"""
     data = {
         'window_start': window_start,
         'pulls_done': pulls_done,
+        'last_ts': last_ts,
         'acc': [
             {'key': list(k), 'cn': v['cn'], 'iv': v['iv'], 'period': v['period']}
             for k, v in acc.items()
@@ -244,27 +246,27 @@ def save_state(acc, pulls_done, window_start):
 
 
 def load_state():
-    """启动时尝试加载未完成窗口的状态。窗口未满即续跑（支持跨天长窗口，如2天48次）"""
+    """启动时加载未完成窗口状态。返回 (acc, pulls_done, window_start, last_ts)"""
     if not os.path.exists(STATE_PATH):
-        return {}, 0, None
+        return {}, 0, None, None
     try:
         with open(STATE_PATH, encoding='utf-8') as f:
             d = json.load(f)
         ws = d.get('window_start', '')
         pd = d.get('pulls_done', 0)
-        # 窗口未满即续跑（支持跨天长窗口，如2天48次均值）
+        lt = d.get('last_ts')
         if pd >= AVG_COUNT:
             print(f"  状态文件窗口已满({pd}/{AVG_COUNT}), 丢弃, 全新开始")
             os.remove(STATE_PATH)
-            return {}, 0, None
+            return {}, 0, None, None
         acc = {}
         for e in d['acc']:
             acc[tuple(e['key'])] = {'cn': e['cn'], 'iv': e['iv'], 'period': e['period']}
-        print(f"  ✅ 续跑: 已累积 {pd}/{AVG_COUNT} 次 (窗口 {ws})")
-        return acc, pd, ws
+        print(f"  ✅ 续跑: 已累积 {pd}/{AVG_COUNT} 次 (窗口 {ws}, 已纳入到 {lt})")
+        return acc, pd, ws, lt
     except Exception as ex:
         print(f"  状态文件读取失败({ex}), 全新开始")
-        return {}, 0, None
+        return {}, 0, None, None
 
 
 # =========================================================
@@ -276,14 +278,15 @@ def main():
     cities = rt.load_cities()
     rt.CITY_RANK  # 偏远优先序号已由 load_cities 设置
 
-    acc, pulls_done, window_start = load_state()
+    acc, pulls_done, window_start, last_ts = load_state()
     windows_done = 0
 
     print(f"\n{'='*60}")
-    print(f"定时均值比对启动")
+    print(f"定时均值比对启动（读留底不拉接口）")
     print(f"  城市: {len(cities)} 城")
-    print(f"  节奏: 每 {INTERVAL}s 拉一次, 攒满 {AVG_COUNT} 次出一份均值报告")
-    print(f"  原始JSON留底: {'开' if KEEP_RAW else '关'}")
+    print(f"  留底: {RAW_PULL_DIR}/原始_<ts>/<城市>/")
+    print(f"  节奏: 每 {INTERVAL}s 扫一次留底, 攒满 {AVG_COUNT} 次出一份均值报告")
+    print(f"  ⚠️ 需 raw_pull.py 在跑才有新数据; 手动出报告用 gen_report_from_raw.py N")
     if MAX_WINDOWS:
         print(f"  测试模式: 跑满 {MAX_WINDOWS} 个窗口后退出")
     print(f"{'='*60}")
@@ -292,23 +295,27 @@ def main():
         while True:
             if window_start is None:
                 window_start = now_str()
-            pull_n = pulls_done + 1
-            print(f"\n[{datetime.datetime.now():%H:%M:%S}] 第 {pull_n}/{AVG_COUNT} 次拉取开始 (窗口 {window_start})")
+            print(f"\n[{datetime.datetime.now():%H:%M:%S}] 扫描留底新轮 (窗口 {window_start}, 已累积 {pulls_done}/{AVG_COUNT})")
 
-            pts_all, ok, skip = pull_once(cities, OUT_DIR, pull_n)
+            new_pulls = scan_new_pulls(cities, last_ts)
+            if not new_pulls:
+                print(f"  无新轮(raw_pull 未拉新数据), 休眠 {INTERVAL}s 后再扫")
+                time.sleep(INTERVAL)
+                continue
 
-            # 整次拉取成功后，才合并进累积器（中断可丢弃本次，不污染已有数据）
-            merge_pull(acc, pts_all)
-            pulls_done += 1
-            save_state(acc, pulls_done, window_start)
-            print(f"  本次成功 {ok} 城, 跳过 {skip} 城; 累积 {pulls_done}/{AVG_COUNT}")
+            for ts, pts in new_pulls:
+                merge_pull(acc, pts)
+                pulls_done += 1
+                last_ts = ts
+                print(f"  累积 {pulls_done}/{AVG_COUNT} (最新轮 {ts})")
+            save_state(acc, pulls_done, window_start, last_ts)
 
             if pulls_done >= AVG_COUNT:
                 window_end = now_str()
                 print(f"\n攒满 {AVG_COUNT} 次, 生成均值报告 ({window_start} ~ {window_end})...")
                 emit_reports(acc, AVG_COUNT, window_start, window_end)
                 # 清空，开始下一窗口
-                acc = {}; pulls_done = 0; window_start = None
+                acc = {}; pulls_done = 0; window_start = None; last_ts = None
                 windows_done += 1
                 if os.path.exists(STATE_PATH):
                     os.remove(STATE_PATH)
@@ -317,13 +324,12 @@ def main():
                     break
                 print(f"\n✅ 本窗口报告已生成, 进入下一窗口")
             else:
-                print(f"  休眠 {INTERVAL}s 后下次拉取... (Ctrl-C 可停止, 状态已存)")
-
-            time.sleep(INTERVAL)
+                print(f"  休眠 {INTERVAL}s 后再扫... (Ctrl-C 可停止, 状态已存)")
+                time.sleep(INTERVAL)
     except KeyboardInterrupt:
         print(f"\n收到 Ctrl-C, 优雅停止")
         if pulls_done and window_start:
-            print(f"  已累积 {pulls_done}/{AVG_COUNT} 次 (窗口 {window_start}), 状态已存, 下次启动续跑")
+            print(f"  已累积 {pulls_done}/{AVG_COUNT} 次 (窗口 {window_start}, 已纳入到 {last_ts}), 状态已存, 下次启动续跑")
         else:
             print("  当前无未完成窗口")
 
