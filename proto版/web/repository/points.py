@@ -67,12 +67,15 @@ def _read_module(conn, module, mspec, pulls, date_range, cities, periods):
     fields = mspec['fields']
     source = mspec['source']
 
-    # 可比对字段（跳过 compare: false）
+    # 可比对字段（跳过 compare: false 和无列映射的）
     comp_fields = {}
     for fname, spec in fields.items():
         if spec.get('compare') is False:
             continue
-        cn_col, intl_col = table_map['fields'][fname]
+        col_map = table_map['fields'].get(fname)
+        if not col_map:
+            continue
+        cn_col, intl_col = col_map
         comp_fields[fname] = (cn_col, intl_col, spec)
     if not comp_fields:
         return [], set()

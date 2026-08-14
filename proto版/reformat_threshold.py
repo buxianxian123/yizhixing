@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-一站式比对：拉取实时数据 → 严格相等比对 + 阈值口径比对
-一次运行输出两份 xlsx 报告（带时间戳，永不覆盖）
+一站式比对：拉取实时数据 → 阈值口径比对
+一次运行输出阈值口径 xlsx 报告（带时间戳，永不覆盖）
+需要严格相等时把 compare_config.yaml thresholds 调成 0 即可
 """
 import json, csv, os, datetime, hashlib, hmac, subprocess, time
 import yaml
@@ -10,6 +11,8 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill
 from collections import defaultdict
 from fetch_cn_pb import fetch_cn_pb, normalize_cn, normalize_in   # 国内 proto detail + pb->旧结构 + 海外补ts
+
+MATCH_TOLERANCE = datetime.timedelta(minutes=10)
 
 # ====== 接口鉴权配置 ======
 PASSWORD_CN = '49ff9a4e5e8bd5e8ce9e057c5adc5d2d'
@@ -24,8 +27,6 @@ CITY_CSV = os.path.join(BASE, '天气一致性测试城市_热门城市筛选.cs
 OUT_DIR = os.path.join(BASE, '比对结果')
 TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%H%M')
 CITY_RANK = {}  # 城市序号，偏差相同时偏远地区优先
-CSV_PATH = os.path.join(OUT_DIR, f'数据明细_{TIMESTAMP}.csv')
-XLSX_STRICT = os.path.join(OUT_DIR, f'一致性比对报告_严格相等_{TIMESTAMP}.xlsx')
 XLSX_THRESHOLD = os.path.join(OUT_DIR, f'一致性比对报告_阈值口径_{TIMESTAMP}.xlsx')
 CONFIG_PATH = os.environ.get('CONFIG_PATH') or os.path.join(SCRIPT_DIR, 'compare_config.yaml')
 
@@ -50,12 +51,23 @@ for name, th in _rain_raw.items():
 # 按上界升序排序
 RAIN_TH.sort(key=lambda x: x[0])
 
+# ====== 数据清洗配置（物理合理范围）======
+_CLEAN_CFG = config.get('data_cleaning', {}) or {}
+CLEAN_ENABLED = _CLEAN_CFG.get('enabled', False)
+CLEAN_RANGES = _CLEAN_CFG.get('ranges', {}) or {}
+
 # ====== 24小时时效分段 ======
-PERIODS_24H = [
-    ('短时效(1-6h)', 0, 6),
-    ('中时效(7-12h)', 6, 12),
-    ('长时效(13-24h)', 12, 24),
-]
+# 优先读配置 compare_config.yaml -> hourly_segments; 无则用默认三段
+# lead=(predictTime-updatetime)/3600, 命中 (min_hour, max_hour] 归入该段
+_seg_cfg = config.get('hourly_segments') or []
+if _seg_cfg:
+    PERIODS_24H = [(s.get('label'), s.get('min_hour'), s.get('max_hour')) for s in _seg_cfg]
+else:
+    PERIODS_24H = [
+        ('短时效(1-6h)', 0, 6),
+        ('中时效(7-12h)', 6, 12),
+        ('长时效(13-24h)', 12, 24),
+    ]
 
 # =========================================================
 # 第一部分：API 请求
@@ -125,10 +137,80 @@ def get_threshold(field):
         if k in field: return v
     return None
 
-def get_period_label(source, idx):
-    if source != 'hourly': return ''
+def get_range(field):
+    """按字段名匹配清洗范围(支持'温度(最高)'等带括号字段), 返回 (键名, 范围dict) 或 None
+    匹配规则同 get_threshold: 键名出现在字段名里即生效"""
+    for k, v in CLEAN_RANGES.items():
+        if k in field:
+            return k, v
+    return None
+
+def clean_value(field, cv, iv_conv):
+    """数据清洗: 值超出物理合理范围视为脏数据
+    返回 (是否剔除, 备注原因); 未配置范围或值在范围内返回 (False, '')"""
+    rng = get_range(field)
+    if rng is None:
+        return False, ''
+    kname, r = rng
+    lo = r.get('min'); hi = r.get('max'); unit = r.get('unit', '')
+    if lo is None or hi is None:
+        return False, ''
+    bad = []
+    if cv is not None and (cv < lo or cv > hi):
+        bad.append(f'国内{cv}{unit}')
+    if iv_conv is not None and (iv_conv < lo or iv_conv > hi):
+        bad.append(f'海外{iv_conv}{unit}')
+    if bad:
+        return True, f'清洗剔除: 超{kname}范围{lo}~{hi}{unit}({", ".join(bad)})'
+    return False, ''
+
+def _parse_utc(s):
+    """UTC时间字符串 -> datetime(UTC)。支持 %Y-%m-%d %H:%M:%S 和 %Y-%m-%d"""
+    if not s:
+        return None
+    try:
+        if ' ' in s:
+            return datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc)
+        else:
+            return datetime.datetime.strptime(s, '%Y-%m-%d').replace(tzinfo=datetime.timezone.utc)
+    except ValueError:
+        return None
+
+def _match_nearest(items, target_utc_str, tolerance=MATCH_TOLERANCE):
+    """在国际列表中找 _utc 与 target_utc_str 最接近且 ≤ tolerance 的条目。
+    返回 (匹配条目, 时间差秒数); 匹配失败返回 (None, None)"""
+    target_dt = _parse_utc(target_utc_str)
+    if target_dt is None:
+        return None, None
+    best = None
+    best_diff = None
+    for item in items:
+        item_dt = _parse_utc(item.get('_utc'))
+        if item_dt is None:
+            continue
+        diff = abs((target_dt - item_dt).total_seconds())
+        if diff <= tolerance.total_seconds():
+            if best is None or diff < best_diff:
+                best = item
+                best_diff = diff
+    return best, best_diff
+
+def get_period_label(source, idx, base_ts=None, predict_ts=None):
+    """24小时时效分段: 优先按真实预报时效 (base_ts=updatetime, predict_ts=predictTime, 单位秒UTC),
+    lead=(predict_ts - base_ts)/3600; 无时间戳时回退到按下标分段。
+    边界: lead > min_hour AND lead <= max_hour (与参考版一致, 左开右闭)"""
+    if source != 'hourly':
+        return ''
+    if base_ts is not None and predict_ts is not None and base_ts > 0 and predict_ts > 0:
+        lead = (predict_ts - base_ts) / 3600
+        for label, start, end in PERIODS_24H:
+            if start < lead <= end:
+                return label
+        return ''
+    # 回退: 按下标分段(左闭右开, 现有行为)
     for label, start, end in PERIODS_24H:
-        if start <= idx < end: return label
+        if start <= idx < end:
+            return label
     return ''
 
 def calc_weather_deviation(cn_text, intl_text):
@@ -153,12 +235,9 @@ def calc_weather_deviation(cn_text, intl_text):
     b = WTH_TEXTS.get(intl_text)
     ok_min = WEATHER_MAP.get('ok_min_score', 5)
 
-    # 未识别的天气文字 → 回退到文字比对
+    # 未识别的天气文字 → 按缺数据处理，不计入一致率分母（与参考版一致）
     if a is None or b is None:
-        ok = '一致' if str(cn_text) == str(intl_text) else '不一致'
-        score = ok_min if ok == '一致' else 3
-        deviation = ok_min - score
-        return (deviation, ok)
+        return (None, '')
 
     level_diff = abs(a['level'] - b['level'])
 
@@ -178,7 +257,7 @@ def calc_weather_deviation(cn_text, intl_text):
             score = WEATHER_MAP['score_hi_diff_cat']
         else:
             # 一方雨/雪一方非降水 → 比纯云量差异更严重
-            is_precip = lambda t: t['cat'] in ('雨', '雪')
+            is_precip = lambda t: str(t.get('cat', '')).startswith('code_8') or str(t.get('cat', '')).startswith('code_16')
             if is_precip(a) != is_precip(b):
                 score = WEATHER_MAP.get('score_diff_cat_precip', 2)
             else:
@@ -188,16 +267,18 @@ def calc_weather_deviation(cn_text, intl_text):
     ok = '一致' if score >= ok_min else '不一致'
     return (deviation, ok)
 
-def cmp_point(city, module, field, ts, cnv, iv, spec, period='', strict=False):
+def cmp_point(city, module, field, ts, cnv, iv, spec, period=''):
     """
-    单个数据点比对
-    strict=True  → 严格相等（diff==0）
-    strict=False → 阈值判断（|diff|<=threshold）
+    单个数据点比对: 阈值判断（|diff|<=threshold）
     返回 10 元组
     """
     typ = spec.get('type', 'numeric'); note = spec.get('note', '')
     if typ == 'wind':
-        cv = num(cnv); iv_conv = wind_convert(num(iv))
+        cv = num(cnv)
+        iv_conv = wind_convert(num(iv))  # 国际风速总是 km/h, 需换算
+        # 国内24小时风速存的是 km/h 原值, 也需换算 (实况/15天存的是 m/s, 不需)
+        if cv is not None and module == '24小时':
+            cv = wind_convert(cv)
         if WIND_CFG.get('enabled') and iv is not None:
             note = f"海外原{iv} ÷{WIND_CFG['divisor']}"
     elif typ == 'weather':
@@ -213,6 +294,11 @@ def cmp_point(city, module, field, ts, cnv, iv, spec, period='', strict=False):
         cv = num(cnv); iv_conv = num(iv)
         if cv is None or iv_conv is None:
             return (city, module, field, ts, cnv, iv, '', '缺数据', note, period)
+        # ---- 数据清洗: 超物理范围的脏数据剔除, 不计入一致率分母 ----
+        if CLEAN_ENABLED:
+            bad, why = clean_value(field, cv, iv_conv)
+            if bad:
+                return (city, module, field, ts, cnv, iv, '', '清洗剔除', why, period)
         cl = rain_level(cv); il = rain_level(iv_conv)
         diff = round(abs(cv - iv_conv), 2)
         ok = '一致' if cl == il else '不一致'
@@ -223,51 +309,109 @@ def cmp_point(city, module, field, ts, cnv, iv, spec, period='', strict=False):
     if cv is None or iv_conv is None:
         return (city, module, field, ts, cnv, iv, '', '缺数据', note, period)
 
+    # ---- 数据清洗: 超物理范围的脏数据剔除, 不计入一致率分母 ----
+    if CLEAN_ENABLED:
+        bad, why = clean_value(field, cv, iv_conv)
+        if bad:
+            return (city, module, field, ts, cnv, iv, '', '清洗剔除', why, period)
+
     diff = round(abs(cv - iv_conv), 2)
-    if strict:
-        ok = '一致' if diff == 0 else '不一致'
-    else:
-        th = get_threshold(field)
-        ok = '一致' if (th is not None and abs(diff) <= th) else '不一致'
+    th = get_threshold(field)
+    ok = '一致' if (th is not None and abs(diff) <= th) else '不一致'
     return (city, module, field, ts, cv, iv_conv, diff, ok, note, period)
 
-def build_points(city, cn, ind, strict=False):
+def build_points(city, cn, ind):
     """遍历所有模块/字段，返回该城市比对数据点列表
     cn 若是国内 proto detail 的 pb 完整 dict(含 detail key), 先 normalize 成旧结构再比对"""
     if cn and isinstance(cn, dict) and 'detail' in cn:
         cn = normalize_cn(cn)
     if ind:
-        ind = normalize_in(ind)
+        # P0修复: 必须传国内时区让海外 predict_time/predict_date 转当地时间,
+        # 否则海外补的是UTC, 与国内(当地)精确字符串匹配错位8小时(北京18:00配UTC18:00)。
+        # normalize_cn 的 _meta.timezone 是该城市时区偏移(如北京8)。与 CSV 工作流(convert_raw_to_csv)同口径。
+        tz_hours = cn.get('_meta', {}).get('timezone') if isinstance(cn, dict) else None
+        ind = normalize_in(ind, tz_hours=tz_hours)
     P = []
     for module, mspec in MODULES.items():
         source = mspec['source']; fields = mspec['fields']
         if mspec.get('multi'):
-            cn_arr = cn.get(source, [])[:mspec.get('limit', 99)]
-            ind_arr = ind.get(source, [])[:mspec.get('limit', 99)]
+            cn_arr = cn.get(source, [])
+            ind_arr = ind.get(source, [])   # 不预截断, 保证 nearest 在全量国际数组中匹配
             ts_key = mspec.get('ts_key'); lim = mspec.get('limit', 99)
-            # 按时次字符串匹配对齐(国内 predict_time/predict_date 已转字符串, 海外由 normalize_in 补)
-            ind_map = {}
-            for b in ind_arr:
-                ts = b.get(ts_key)
-                if ts is not None:
-                    ind_map[ts] = b
-            matched = []
-            for a in cn_arr:
-                ts = a.get(ts_key)
-                if ts is not None and ts in ind_map:
-                    matched.append((ts, a, ind_map[ts]))
-                if len(matched) >= lim:
-                    break
-            for k, (ts, a, b) in enumerate(matched):
-                period = get_period_label(source, k)
-                for field, spec in fields.items():
-                    P.append(cmp_point(city, module, field, ts, a.get(spec['cn']), b.get(spec['intl']), spec, period, strict))
+
+            if source == 'hourly':
+                # 24小时: UTC最近匹配 + 10分钟容差, 按真实预报时效分段 (与参考版一致)
+                base_ts_val = cn.get('_meta', {}).get('updatetime')
+                matched = []
+                for a in cn_arr:
+                    b, _ = _match_nearest(ind_arr, a.get('_utc'))
+                    if b is None:
+                        continue
+                    predict_ts = a.get('_predict_ts')
+                    matched.append((a.get(ts_key), a, b, predict_ts, base_ts_val))
+                    if len(matched) >= lim:
+                        break
+                for k, (ts, a, b, predict_ts, base_ts_v) in enumerate(matched):
+                    period = get_period_label(source, k, base_ts_v, predict_ts)
+                    if not period:
+                        continue   # 超出0-24h时效范围的记录不纳入小时预报统计(与参考版一致)
+                    for field, spec in fields.items():
+                        if spec.get('compare') is False:
+                            continue   # 只拉取不比对(紫外线/能见度/风向)
+                        P.append(cmp_point(city, module, field, ts, a.get(spec['cn']), b.get(spec['intl']), spec, period))
+            else:
+                # 15天: 按日期字符串匹配(同现有逻辑)
+                ind_map = {}
+                for b in ind_arr[:lim]:
+                    t = b.get(ts_key)
+                    if t is not None:
+                        ind_map[t] = b
+                matched = []
+                for a in cn_arr:
+                    t = a.get(ts_key)
+                    if t is not None and t in ind_map:
+                        matched.append((t, a, ind_map[t]))
+                    if len(matched) >= lim:
+                        break
+                for k, (ts, a, b) in enumerate(matched):
+                    period = get_period_label(source, k)
+                    for field, spec in fields.items():
+                        if spec.get('compare') is False:
+                            continue   # 只拉取不比对(紫外线/能见度/风向)
+                        P.append(cmp_point(city, module, field, ts, a.get(spec['cn']), b.get(spec['intl']), spec, period))
         else:
             cn_mod = cn.get(source, {}); ind_mod = ind.get(source, {})
             ts = mspec.get('ts_label', '')
             for field, spec in fields.items():
-                P.append(cmp_point(city, module, field, ts, cn_mod.get(spec['cn']), ind_mod.get(spec['intl']), spec, '', strict))
+                if spec.get('compare') is False:
+                    continue   # 只拉取不比对(紫外线/能见度/风向)
+                P.append(cmp_point(city, module, field, ts, cn_mod.get(spec['cn']), ind_mod.get(spec['intl']), spec, ''))
     return P
+
+def write_detail_csv(points, out_dir, name_prefix, batch_time=None):
+    """按模块分文件写数据明细CSV(每个模块一个文件), 每行带写入时间(批次标识)
+    points: cmp_point 返回的 10 元组列表
+    out_dir: 输出目录
+    name_prefix: 文件名前缀, 拼成 {name_prefix}_{模块}.csv
+    batch_time: 批次写入时间(同批所有行一致, 便于追溯批次), 默认当前时刻
+    返回写入的文件路径列表"""
+    if batch_time is None:
+        batch_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    by_mod = {}
+    for p in points:
+        by_mod.setdefault(p[1], []).append(p)   # p[1] = 模块
+    header = ['城市', '模块', '字段', '时次', '国内值', '海外值', '差异', '是否一致', '备注', '时效分段', '写入时间']
+    paths = []
+    for m, pts in by_mod.items():
+        path = os.path.join(out_dir, f'{name_prefix}_{m}.csv')
+        with open(path, 'w', encoding='utf-8-sig', newline='') as f:
+            w = csv.writer(f)
+            w.writerow(header)
+            for p in pts:
+                w.writerow(list(p) + [batch_time])
+        paths.append(path)
+    return paths
+
 
 # =========================================================
 # 第三部分：生成 xlsx
@@ -279,57 +423,65 @@ def _weather_level_diff(cn_val, intl_val):
     if not a or not b: return 0
     return abs(a['level'] - b['level'])
 
-def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
-    """生成一致性比对报告 xlsx
-    extra_notes: 可选，追加到「说明」sheet 末尾的额外说明（如均值报告的采样信息），默认 None 不追加"""
-    # 从title解析均值次数(如"阈值口径(47次均值)"),天气误判次数标注"X次/N份"避免歧义
-    import re
-    _m = re.search(r'(\d+)次均值', title)
-    _avg_n = int(_m.group(1)) if _m else 0
-    _cities = len(set(p[0] for p in allP))
-    def _cnt(n): return f'{n}/{_cities*_avg_n}' if _avg_n > 1 else f'{n}次'
-
-    # ---------- Sheet1 数据明细 ----------
-    wb = openpyxl.Workbook()
-    ws = wb.active; ws.title = '数据明细'
-    H = ['城市', '模块', '字段', '时次', '国内值', '海外值', '差异', '是否一致', '备注', '时效分段']
-    ws.append(H)
-    for c in range(1, len(H)+1):
-        ws.cell(row=1, column=c).font = Font(bold=True)
-    green = PatternFill('solid', fgColor='E6F7E6')
-    red = PatternFill('solid', fgColor='FFE6E6')
-    gray = PatternFill('solid', fgColor='F0F0F0')
-    for p in allP:
-        ws.append(list(p))
-    for i, p in enumerate(allP, 2):
-        cell = ws.cell(row=i, column=8)
-        if p[7] == '一致': cell.fill = green
-        elif p[7] == '不一致': cell.fill = red
-        else: cell.fill = gray
-        # 差异列(column 7) 数值带单位
-        diff_cell = ws.cell(row=i, column=7)
-        if isinstance(p[6], (int, float)):
-            f = p[2]
-            u = ''
-            if '天气现象' not in f:
-                if '温度' in f or '体感' in f: u = '℃'
-                elif '湿度' in f: u = '%'
-                elif '风速' in f: u = 'm/s'
-                elif '气压' in f: u = 'hPa'
-                elif '降水' in f: u = 'mm'
-            if u:
-                diff_cell.value = f'{p[6]}{u}'
-    for col, w in zip('ABCDEFGHIJ', [12, 10, 14, 18, 14, 14, 10, 10, 22, 14]):
-        ws.column_dimensions[col].width = w
-    ws.freeze_panes = 'A2'
-
-    # ---------- Sheet2 总结 ----------
-    ws2 = wb.create_sheet('总结')
-    stat = defaultdict(lambda: {'total': 0, 'miss': 0, 'n': 0, 'ok': 0, 'sumdiff': 0, 'maxdiff': 0, 'maxcity': '', 'top': {}, 'dev_counts': defaultdict(int), 'pair_counts': defaultdict(int)})
+def aggregate_stats(allP):
+    """聚合 stat：key=(field, module, period)，value 含 total/miss/clean/n/ok/
+    sumdiff/maxdiff/maxcity/top/dev_counts/pair_counts。
+    top: {city: (diff, str(cn), str(iv))} 仅存不一致城市的最大偏差；
+    pair_counts: 天气现象 (cn, iv) 配对计数；dev_counts: 偏差值分布。"""
+    stat = defaultdict(lambda: {'total': 0, 'miss': 0, 'clean': 0, 'n': 0, 'ok': 0,
+                                'sumdiff': 0, 'maxdiff': 0, 'maxcity': '',
+                                'top': {}, 'dev_counts': defaultdict(int),
+                                'pair_counts': defaultdict(int)})
     for p in allP:
         city, module, field, ts, cnv, iv, diff, ok, note, period = p
         s = stat[(field, module, period)]
         s['total'] += 1
+        if ok == '清洗剔除':
+            s['clean'] += 1
+            continue
+        if ok in ('缺数据', ''):
+            s['miss'] += 1
+            continue
+        s['n'] += 1
+        if ok == '一致':
+            s['ok'] += 1
+        if isinstance(diff, (int, float)):
+            s['sumdiff'] += abs(diff)
+            if (abs(diff) > abs(s['maxdiff']) or
+                    (abs(diff) == abs(s['maxdiff']) and
+                     CITY_RANK.get(city, 9999) > CITY_RANK.get(s['maxcity'], 9999))):
+                s['maxdiff'] = diff
+                s['maxcity'] = city
+            if ok != '一致':
+                if city not in s['top'] or abs(diff) > abs(s['top'][city][0]):
+                    s['top'][city] = (diff, str(cnv or ''), str(iv or ''))
+            s['dev_counts'][int(diff)] += 1
+        if '天气现象' in field and cnv is not None and iv is not None:
+            s['pair_counts'][(str(cnv), str(iv))] += 1
+    return stat
+
+def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
+    """生成一致性比对报告 xlsx
+    extra_notes: 可选，追加到「说明」sheet 末尾的额外说明（如均值报告的采样信息），默认 None 不追加"""
+    # 从title解析拉取次数(如"阈值口径(47次均值)"或"阈值口径(47次拉取逐条)")
+    import re
+    _m = re.search(r'(\d+)次(均值|拉取)', title)
+    _avg_n = int(_m.group(1)) if _m else 0
+    _is_direct = bool(_m and _m.group(2) == '拉取')  # 逐次比对模式
+    _cities = len(set(p[0] for p in allP))
+    def _cnt(n): return f'{n}次' if _is_direct else (f'{n}/{_cities*_avg_n}' if _avg_n > 1 else f'{n}次')
+
+    # ---------- Sheet1 总结 ----------
+    wb = openpyxl.Workbook()
+    ws = wb.active; ws.title = '总结'
+    # 统计逻辑不变, 但数据明细sheet不写了(有CSV留底即可)
+    stat = defaultdict(lambda: {'total': 0, 'miss': 0, 'clean': 0, 'n': 0, 'ok': 0, 'sumdiff': 0, 'maxdiff': 0, 'maxcity': '', 'top': {}, 'dev_counts': defaultdict(int), 'pair_counts': defaultdict(int)})
+    for p in allP:
+        city, module, field, ts, cnv, iv, diff, ok, note, period = p
+        s = stat[(field, module, period)]
+        s['total'] += 1
+        if ok == '清洗剔除':
+            s['clean'] += 1; continue
         if ok in ('缺数据', ''):
             s['miss'] += 1; continue
         s['n'] += 1
@@ -341,17 +493,17 @@ def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
             if abs(diff) > abs(s['maxdiff']) or \
                (abs(diff) == abs(s['maxdiff']) and CITY_RANK.get(city, 9999) > CITY_RANK.get(s['maxcity'], 9999)):
                 s['maxdiff'] = diff; s['maxcity'] = city
-            if city not in s['top'] or abs(diff) > abs(s['top'][city][0]):
+            if ok != '一致' and (city not in s['top'] or abs(diff) > abs(s['top'][city][0])):
                 s['top'][city] = (diff, str(cnv or ''), str(iv or ''))
             s['dev_counts'][int(diff)] += 1
         # 天气现象字段：统计 CN→INTL 配对频次
         if '天气现象' in field and cnv is not None and iv is not None:
             s['pair_counts'][(str(cnv), str(iv))] += 1
 
-    H2 = ['字段', '模块', '时效', '总数据', '缺数据(已排除)', '有效样本', '一致数', '一致率', '平均偏差', '最大偏差', '最大偏差城市']
-    ws2.append(H2)
+    H2 = ['字段', '模块', '时效', '总数据', '缺数据(已排除)', '清洗剔除(已排除)', '有效样本', '一致数', '一致率', '平均偏差', '最大偏差', '最大偏差城市']
+    ws.append(H2)
     for c in range(1, len(H2)+1):
-        ws2.cell(row=1, column=c).font = Font(bold=True)
+        ws.cell(row=1, column=c).font = Font(bold=True)
     PERIOD_ORDER = {p[0]: i for i, p in enumerate(PERIODS_24H)}
     for module in MODULES.keys():
         items = sorted(stat.items(), key=lambda x: (
@@ -363,47 +515,10 @@ def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
             if m != module: continue
             rate = f"{s['ok']/s['n']*100:.1f}%" if s['n'] else '0'
 
-            # 天气现象字段：显示最频繁的 CN→INTL 误判对
-            if '天气现象' in field and s['pair_counts']:
-                sorted_pairs = sorted(s['pair_counts'].items(), key=lambda x: -x[1])
-                mismatch = [(p, c) for p, c in sorted_pairs if p[0] != p[1]]  # 排除一致的
-                # 平均偏差：最常见的误判对，只写一个
-                if mismatch:
-                    avg_display = f'国内{mismatch[0][0][0]}→国外{mismatch[0][0][1]}({_cnt(mismatch[0][1])})'
-                else:
-                    avg_display = round(s['sumdiff'] / s['n'], 2) if s['n'] else ''
-                # 最大偏差：按实际偏差等级算，找最高等级的常见误判对
-                max_dev = max(s['dev_counts'].keys(), key=lambda k: abs(k)) if s['dev_counts'] else None
-                if max_dev and max_dev >= 1:
-                    # 逐一算每个误判对的偏差值，找到等于 max_dev 的
-                    best_pair = None
-                    best_cnt = 0
-                    for (cn_val, intl_val), cnt in mismatch:
-                        dev, _ = calc_weather_deviation(cn_val, intl_val)
-                        if dev == max_dev and cnt > best_cnt:
-                            best_pair = (cn_val, intl_val)
-                            best_cnt = cnt
-                    if best_pair:
-                        # 优先找同等级偏差中涉及雨/雪的误判对，更有意义
-                        rain_pair = None
-                        rain_cnt = 0
-                        for (cn2, intl2), cnt2 in mismatch:
-                            if cnt2 <= rain_cnt: continue
-                            d2, _ = calc_weather_deviation(cn2, intl2)
-                            if d2 == max_dev:
-                                ta = WTH_TEXTS.get(cn2, {})
-                                tb = WTH_TEXTS.get(intl2, {})
-                                if ta.get('cat') in ('雨','雪') or tb.get('cat') in ('雨','雪'):
-                                    rain_pair = (cn2, intl2)
-                                    rain_cnt = cnt2
-                        if rain_pair:
-                            max_display = f'国内{rain_pair[0]}→国外{rain_pair[1]}({_cnt(rain_cnt)})'
-                        else:
-                            max_display = f'国内{best_pair[0]}→国外{best_pair[1]}({_cnt(best_cnt)})'
-                    else:
-                        max_display = f'偏差{int(max_dev)}级 {_cnt(s["dev_counts"][max_dev])}'
-                else:
-                    max_display = s['maxdiff']
+            # 天气现象字段：平均偏差和最大偏差写"-"（与参考版一致）
+            if '天气现象' in field:
+                avg_display = '-'
+                max_display = '-'
             else:
                 avg_display = round(s['sumdiff'] / s['n'], 2) if s['n'] else ''
                 max_display = s['maxdiff']
@@ -414,15 +529,38 @@ def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
                 elif '湿度' in field: u = '%'
                 elif '风速' in field: u = 'm/s'
                 elif '气压' in field: u = 'hPa'
+                elif '降水概率' in field: u = '%'
                 elif '降水' in field: u = 'mm'
                 avg_display = f'{avg_display}{u}'
                 if isinstance(max_display, (int, float)):
                     max_display = f'{max_display}{u}'
 
-            ws2.append([field, m, period, s['total'], s['miss'], s['n'], s['ok'], rate, avg_display, max_display, s['maxcity']])
-    for col, w in zip('ABCDEFGHIJK', [16, 10, 14, 8, 14, 10, 8, 10, 10, 10, 14]):
-        ws2.column_dimensions[col].width = w
-    ws2.freeze_panes = 'A2'
+            ws.append([field, m, period, s['total'], s['miss'], s['clean'], s['n'], s['ok'], rate, avg_display, max_display, s['maxcity']])
+    for col, w in zip('ABCDEFGHIJKL', [16, 10, 14, 8, 14, 16, 10, 8, 10, 10, 10, 14]):
+        ws.column_dimensions[col].width = w
+    ws.freeze_panes = 'A2'
+
+    # ---------- Sheet 天气TOP5不一致对 ----------
+    ws_pairs = wb.create_sheet('天气TOP对')
+    PH = ['模块', '字段', '时效', '国内天气', '国际天气', '次数']
+    ws_pairs.append(PH)
+    for c in range(1, len(PH)+1):
+        ws_pairs.cell(row=1, column=c).font = Font(bold=True)
+    for (field, m, period), s in stat.items():
+        if '天气现象' not in field or not s.get('pair_counts'):
+            continue
+        sorted_pairs = sorted(s['pair_counts'].items(), key=lambda x: -x[1])
+        # 仅统计"大类不一致"的组合(与8大类判定口径一致), 同大类文字不同(如小雨→中雨)不列为不一致对
+        mismatch = []
+        for (cn_val, intl_val), cnt in sorted_pairs:
+            a = WTH_TEXTS.get(cn_val)
+            b = WTH_TEXTS.get(intl_val)
+            if a is not None and b is not None and a['cat'] != b['cat']:
+                mismatch.append(((cn_val, intl_val), cnt))
+        for (cn_val, intl_val), cnt in mismatch[:5]:
+            ws_pairs.append([m, field, period, cn_val, intl_val, cnt])
+    for col, w in zip('ABCDEF', [10, 16, 14, 14, 14, 8]):
+        ws_pairs.column_dimensions[col].width = w
 
     # ---------- Sheet 前五偏差城市 ----------
     ws_top = wb.create_sheet('前五偏差城市')
@@ -458,6 +596,7 @@ def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
                     elif '湿度' in field: u = '%'
                     elif '风速' in field: u = 'm/s'
                     elif '气压' in field: u = 'hPa'
+                    elif '降水概率' in field: u = '%'
                     elif '降水' in field: u = 'mm'
                 d_val = round(d, 2)
                 ws_top.append([m, field, period or '', rank, city, pair_str, f'{d_val}{u}' if u else d_val])
@@ -481,11 +620,19 @@ def gen_xlsx(allP, title, xlsx_path, extra_notes=None):
     notes.append('二、风速换算(来自配置):')
     notes.append(f"  enabled={WIND_CFG.get('enabled')}, divisor={WIND_CFG.get('divisor')} (海外km/h÷3.6→m/s)")
     notes.append('')
-    notes.append('三、24小时时效分段: 短时效(1-6h) / 中时效(7-12h) / 长时效(13-24h)')
+    notes.append('三、数据清洗(物理合理范围, 来自配置 data_cleaning):')
+    notes.append(f"  enabled={CLEAN_ENABLED}, 超范围的值标\"清洗剔除\"并排除出一致率分母")
+    if CLEAN_ENABLED and CLEAN_RANGES:
+        for k, r in CLEAN_RANGES.items():
+            notes.append(f"  {k}: {r.get('min')}~{r.get('max')}{r.get('unit','')} ({r.get('basis','')})")
+    else:
+        notes.append('  (未配置清洗范围, 不剔除任何值)')
     notes.append('')
-    notes.append('四、时次对齐: 24h按predict_time, 15天按predict_date')
+    notes.append('四、24小时时效分段: ' + ' / '.join(p[0] for p in PERIODS_24H))
     notes.append('')
-    notes.append('五、天气现象语义映射比对规则（五分制评分）：')
+    notes.append('五、时次对齐: 24h按predict_time, 15天按predict_date')
+    notes.append('')
+    notes.append('六、天气现象语义映射比对规则（五分制评分）：')
     notes.append('  将国内外中文天气文字统一映射到(大类, 量级, 是否高影响)')
     notes.append('  评分→偏差规则:')
     notes.append('    5分 主天气一致+量级一致                     → 完全匹配')
@@ -539,7 +686,6 @@ def main():
     print(f"共 {len(cities)} 个城市, 开始请求实时 API...")
 
     # 2. 逐个城市拉数据 + 比对
-    allP_strict = []
     allP_threshold = []
     ok_count = 0
 
@@ -553,9 +699,7 @@ def main():
             print(f"  [{idx}/{len(cities)}] ⏭️ {name} 国际接口失败, 跳过")
             continue
 
-        # 同时构建两种口径的比对数据
-        allP_strict += build_points(name, cn_data, in_data, strict=True)
-        allP_threshold += build_points(name, cn_data, in_data, strict=False)
+        allP_threshold += build_points(name, cn_data, in_data)
         ok_count += 1
 
         if idx % 10 == 0 or idx == len(cities):
@@ -563,30 +707,22 @@ def main():
 
     print(f"\n请求完成: 成功 {ok_count} 个城市, 跳过 {len(cities) - ok_count} 个")
 
-    if not allP_strict:
+    if not allP_threshold:
         print("❌ 无有效数据, 不生成报告")
         return
 
-    # 3. 生成严格相等报告
-    n1 = gen_xlsx(allP_strict, '严格相等', XLSX_STRICT)
-    print(f"\n✅ 严格相等报告: {XLSX_STRICT}")
-    print(f"   数据点: {n1}")
-
-    # 4. 生成阈值口径报告
+    # 3. 生成阈值口径报告
     n2 = gen_xlsx(allP_threshold, '阈值口径', XLSX_THRESHOLD)
     print(f"✅ 阈值口径报告: {XLSX_THRESHOLD}")
     print(f"   数据点: {n2}")
 
-    # 5. 导出数据明细CSV（替代原始JSON作为证据，长格式）
-    with open(CSV_PATH, 'w', encoding='utf-8-sig', newline='') as f:
-        w = csv.writer(f)
-        w.writerow(['城市', '模块', '字段', '时次', '国内值', '海外值', '差异', '是否一致', '备注', '时效分段'])
-        for p in allP_threshold:
-            w.writerow(p)
-    print(f"✅ 数据明细CSV: {CSV_PATH}")
-    print(f"   数据点: {len(allP_threshold)}")
+    # 4. 导出数据明细CSV(按模块分文件, 每行带写入时间标识批次; 替代原始JSON作为证据)
+    csv_paths = write_detail_csv(allP_threshold, OUT_DIR, f'数据明细_{TIMESTAMP}')
+    print(f"✅ 数据明细CSV(按模块分文件, 共{len(csv_paths)}个):")
+    for p in csv_paths:
+        print(f"   {os.path.basename(p)}")
 
-    # 6. 快速打印阈值口径一致率
+    # 5. 快速打印阈值口径一致率
     print(f"\n{'='*60}")
     print(f"阈值口径 — 各字段一致率速览")
     print(f"{'='*60}")
@@ -594,7 +730,7 @@ def main():
     ws = wb['总结']
     for row in ws.iter_rows(min_row=2, values_only=True):
         if row[0] and not row[2]:  # 无时效分段的汇总行（实况/15天/AQI）
-            print(f"  {str(row[0]):14s} {str(row[1]):8s}  一致率: {str(row[7]):>7s}  平均偏差: {str(row[8]):>8s}")
+            print(f"  {str(row[0]):14s} {str(row[1]):8s}  一致率: {str(row[8]):>7s}  平均偏差: {str(row[9]):>8s}")
 
 if __name__ == '__main__':
     main()
