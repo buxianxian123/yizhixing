@@ -1,0 +1,177 @@
+# 国内/国际天气数据一致性比对规则配置
+# 修改本文件即可调整比对口径, 无需改代码
+# 运行: python3 reformat_threshold.py
+
+# ===== 一致判定阈值 =====
+# 数值字段: |国内值 - 海外值| <= 阈值 算"一致", 否则"不一致"
+# weather类型: 中文文字完全相等算"一致"
+# rain_level类型: 参见下方降水量等级比对规则
+# 缺数据(国内或海外无值): 标"缺数据", 不计入一致率分母
+thresholds:
+  温度: 2         # ℃
+  体感温度: 2      # ℃
+  湿度: 10          # %
+  风速: 2          # m/s (海外已÷3.6换算)
+  气压: 10          # hPa
+  AQI: 20
+  降水概率: 5          # % (降水概率差≤5算一致, 替代无mm字段的降水量对比)
+  # 降水量: 改用 rain_level 字段类型, 阈值在此不生效
+  # PM2.5 不比较
+
+# (降水量等级已移除: detail实况无precip_1h, proto版无比对; json版coapi有保留)
+# ===== 天气现象语义映射（完整版 44+29 种）=====
+# 把国内外中文天气文字统一映射到(大类, 量级, 是否高影响)
+#
+# 评分规则（5=最佳 → 0=最差，仅5分算一致）：
+#   5分  主天气一致+量级一致                     → 完全匹配
+#   4分  主天气一致+量级差1级                     → 轻微量级偏差
+#   3分  主天气不一致（晴↔多云等），均非高影响      → 主天气不一致
+#   2分  主天气错判（量级差≥2），或降水vs非降水    → 明显偏差
+#   1分  涉及高影响天气+同大类                   → 高影响偏差
+#   0分  高影响天气+不同大类                     → 高影响漏报/错判
+# 一致判定: score≥5（偏差=0）
+weather_mapping:
+  score_same_cat_same_level: 5
+  score_same_cat_level_diff_1: 4
+  score_diff_cat_no_hi: 3
+  score_same_cat_level_diff_ge2: 2
+  score_diff_cat_precip: 2   # 一方雨/雪一方非降水，比纯云量差异更严重
+  score_hi_same_cat: 1
+  score_hi_diff_cat: 0
+  ok_min_score: 5
+  texts:
+    # ============ 晴 / 无云系 ============
+    晴:         {cat: 晴, level: 0, hi: false}
+    大部晴朗:   {cat: 晴, level: 0, hi: false}       # 晴的衍生
+
+    # ============ 阴天系（多云/阴/雾/霾 归为一类，均为非降水天气）============
+    少云:       {cat: 晴, level: 0, hi: false}       # 晴占主导，少云≈晴
+    多云:       {cat: 多云, level: 0, hi: false}
+    阴:         {cat: 多云, level: 0, hi: false}      # 阴≈多云，只是云量区别
+    雾:         {cat: 多云, level: 0, hi: false}      # 雾≈阴天，API分类差异大
+    冻雾:       {cat: 多云, level: 0, hi: false}      # 雾的衍生
+    霾:         {cat: 多云, level: 0, hi: false}      # 霾≈阴天有污染
+    霜:         {cat: 霜, level: 0, hi: false}
+
+    # ============ 冻雨 ============
+    冻雨:       {cat: 冻雨, level: 0, hi: false}
+
+    # ============ 雨系列（按强度递增）============
+    零星小雨:   {cat: 雨, level: 1, hi: false}
+    小阵雨:     {cat: 雨, level: 1, hi: false}       # 比小雨还轻
+    雨:         {cat: 雨, level: 1, hi: false}       # 泛指雨
+    小雨:       {cat: 雨, level: 2, hi: false}
+    小到中雨:   {cat: 雨, level: 2, hi: false}       # 按小雨算
+    阵雨:       {cat: 雨, level: 2, hi: false}
+    局部阵雨:   {cat: 雨, level: 2, hi: false}
+    中雨:       {cat: 雨, level: 3, hi: false}
+    中到大雨:   {cat: 雨, level: 3, hi: false}       # 按中雨算
+    强阵雨:     {cat: 雨, level: 3, hi: false}       # 同中雨级
+    大到暴雨:   {cat: 雨, level: 4, hi: true}        # 高影响 按大雨算
+    大雨:       {cat: 雨, level: 4, hi: true}        # 高影响
+    暴雨:       {cat: 雨, level: 5, hi: true}        # 高影响
+    大暴雨:     {cat: 雨, level: 6, hi: true}        # 高影响
+    特大暴雨:   {cat: 雨, level: 7, hi: true}        # 高影响
+
+    # ============ 雪系列（按强度递增）============
+    零星小雪:   {cat: 雪, level: 1, hi: false}
+    阵雪:       {cat: 雪, level: 1, hi: false}
+    小阵雪:     {cat: 雪, level: 1, hi: false}       # 比小雪还轻
+    雪:         {cat: 雪, level: 1, hi: false}       # 泛指雪
+    小雪:       {cat: 雪, level: 2, hi: false}
+    小到中雪:   {cat: 雪, level: 2, hi: false}       # 按小雪算
+    雨夹雪:     {cat: 雪, level: 2, hi: false}
+    中雪:       {cat: 雪, level: 3, hi: false}
+    大雪:       {cat: 雪, level: 4, hi: true}        # 高影响
+    暴雪:       {cat: 雪, level: 5, hi: true}        # 高影响
+
+    # ============ 雷暴/雷电 ============
+    # 雷阵雨：有雷的雨，本质是降水，降为雨大类（level=2 同小雨/阵雨）
+    雷阵雨:     {cat: 雨, level: 2, hi: false}
+    雷阵雨伴有冰雹: {cat: 雷暴, level: 0, hi: true} # 带冰雹是真严重，保留高影响
+    雷电:       {cat: 雷暴, level: 0, hi: true}      # 高影响（纯雷电无降水）
+    雷暴:       {cat: 雷暴, level: 0, hi: true}      # 高影响
+
+    # ============ 冰雹（含冰衍生）============
+    冰雹:       {cat: 冰雹, level: 0, hi: true}      # 高影响
+    冰针:       {cat: 冰雹, level: 0, hi: true}      # 冰的衍生
+    冰粒:       {cat: 冰雹, level: 0, hi: true}      # 冰的衍生
+
+    # ============ 沙尘系列 ============
+    浮尘:       {cat: 沙尘, level: 0, hi: false}
+    扬沙:       {cat: 沙尘, level: 0, hi: false}
+    尘卷风:     {cat: 沙尘, level: 0, hi: false}
+    沙尘暴:     {cat: 沙尘, level: 1, hi: false}
+    强沙尘暴:   {cat: 沙尘, level: 2, hi: false}
+
+# ===== 风速换算 =====
+# 国内风速单位 m/s, 海外 km/h, 海外值需 ÷divisor 换算成 m/s 再比对
+wind_convert:
+  enabled: true
+  divisor: 3.6
+
+# ===== 字段映射 =====
+# type: numeric(数值,按阈值) / wind(风速,需换算) / weather(天气现象,按文字)
+# multi: false=单值对象(current/aqi) / true=数组(hourly/daily,取limit条)
+# ts_key: 数组每条的时间标签字段; ts_label: 单值模块的时次标签
+# note: 备注说明(显示在明细备注列)
+modules:
+  实况:
+    source: current
+    multi: false
+    ts_label: 实况
+    fields:
+      温度: {cn: temp, intl: temp, type: numeric}
+      体感温度: {cn: real_feel, intl: rf, type: numeric}
+      湿度: {cn: humidity, intl: rh, type: numeric}
+      风速: {cn: wspd, intl: wspd, type: wind}
+      气压: {cn: mslp, intl: sp, type: numeric}
+      天气现象: {cn: weather, intl: wtr, type: weather}
+      # 降水量: detail实况无 precip_1h 字段, 比不了已移除 (json版coapi有precip_1h可比, 老报告77.6%)
+
+  24小时:
+    source: hourly
+    multi: true
+    limit: 24
+    ts_key: predict_time
+    fields:
+      温度: {cn: temp, intl: temp, type: numeric}
+      体感温度: {cn: real_feel, intl: rf, type: numeric}
+      湿度: {cn: humidity, intl: rh, type: numeric}
+      风速: {cn: wspd, intl: wspd, type: wind}
+      气压: {cn: mslp, intl: sp, type: numeric}
+      天气现象: {cn: weather, intl: wtr, type: weather}
+      降水概率: {cn: pop, intl: pop, type: numeric}
+
+  15天:
+    source: daily
+    multi: true
+    limit: 16
+    ts_key: predict_date
+    fields:
+      温度(最高): {cn: temp_high, intl: temph, type: numeric}
+      温度(最低): {cn: temp_low, intl: templ, type: numeric}
+      # 体感温度(白天/夜间): detail接口逐日无 realFeel 字段, 比不了已移除 (json版coapi有realfeel_d/n可比)
+      湿度: {cn: humidity, intl: rh, type: numeric}
+      风速(白天): {cn: wspd_day, intl: wspdd, type: wind}
+      风速(夜间): {cn: wspd_night, intl: wspdn, type: wind}
+      气压: {cn: mslp, intl: spd, type: numeric, note: 海外取白天spd}
+      天气现象(白天): {cn: weather_day, intl: wtrd, type: weather}
+      天气现象(夜间): {cn: weather_night, intl: wtrn, type: weather}
+      降水概率: {cn: pop, intl: pop, type: numeric}
+
+  AQI模块:
+    source: aqi
+    multi: false
+    ts_label: AQI实况
+    fields:
+      AQI: {cn: aqi, intl: AQI, type: numeric}
+
+# ===== 定时均值比对（scheduled_compare.py 用）=====
+# 每 interval_seconds 秒全量拉一次，攒满 avg_count 次后取平均、出一份均值报告
+# 数值字段取均值，天气现象取众数，再跑一次比对（报告格式与单次一致，只是数据更稳）
+# 改本段即可调窗口，无需改代码；运行: python3 scheduled_compare.py
+schedule:
+  interval_seconds: 3600  # 拉取间隔（秒），3600=每1小时
+  avg_count: 48            # 攒满几次出一份平均报告，48次=2天
+  keep_raw: true           # 每次原始JSON落盘留底（true=留，false=不留省空间）

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>墨迹天气 · 国内/国际数据一致性分析平台</title>
+<link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+
+<!-- ===== 顶栏 ===== -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="logo">◈ <span>数据一致性分析平台</span></div>
+    <div class="logo-sub">墨迹天气 · 国内 / 国际</div>
+  </div>
+  <div class="topbar-right">
+    <span id="db-status" class="db-status">连接中…</span>
+    <button class="btn-primary" onclick="App.generateReport()">生成 Markdown 报告</button>
+  </div>
+</header>
+
+<!-- ===== 筛选区 ===== -->
+<section class="filters">
+  <div class="filter-row">
+    <div class="fgroup">
+      <label>日期</label>
+      <input type="date" id="f-date-start">
+      <span>~</span>
+      <input type="date" id="f-date-end">
+    </div>
+    <div class="fgroup quick">
+      <button class="chip" data-range="1d">最近1天</button>
+      <button class="chip" data-range="3d">最近3天</button>
+      <button class="chip" data-range="7d">最近7天</button>
+    </div>
+    <div class="fgroup">
+      <label>批次</label>
+      <select id="f-pull" multiple size="1"></select>
+      <span class="hint" id="f-pull-count">已选 0 批</span>
+    </div>
+    <div class="fgroup">
+      <label>国</label><select id="f-country"><option value="">全部</option></select>
+      <label>省</label><select id="f-prov"><option value="">全部</option></select>
+      <label>市</label><select id="f-city3"><option value="">全部</option></select>
+    </div>
+    <div class="fgroup">
+      <label>模块</label>
+      <select id="f-module" multiple size="1"></select>
+    </div>
+    <div class="fgroup">
+      <label>时效</label>
+      <select id="f-period" multiple size="1"></select>
+    </div>
+    <div class="fgroup">
+      <button class="btn-primary" onclick="App.apply()">查询</button>
+      <button class="btn-ghost" onclick="App.reset()">重置</button>
+    </div>
+  </div>
+  <div class="filter-sub">
+    <span class="hint">筛选后所有图表 / 指标 / 表格同步更新；批次支持多选（Ctrl/⌘+点击），选中后优先于日期。</span>
+  </div>
+</section>
+
+<!-- ===== 核心指标 ===== -->
+<section class="core-kpis" id="core-kpis"></section>
+
+<!-- ===== 质量异常概览 ===== -->
+<section class="quality-overview" id="quality-overview"></section>
+
+<!-- ===== 主内容 ===== -->
+<main class="layout">
+  <!-- 图表区 -->
+  <div class="grid">
+    <!-- 模块一致率 + 一致分布 -->
+    <div class="card" id="card-moduleBar">
+      <div class="card-head">
+        <span class="card-title">模块一致率</span>
+        <div class="card-ctrl">
+          <button class="ctl-btn active" data-view="bar" onclick="Charts.setModuleView('bar',this)">柱状</button>
+          <button class="ctl-btn" data-view="radar" onclick="Charts.setModuleView('radar',this)">雷达</button>
+        </div>
+      </div>
+      <div class="chart-body mid" id="ch-moduleBar"></div>
+    </div>
+
+    <div class="card" id="card-pie">
+      <div class="card-head"><span class="card-title">一致分布</span></div>
+      <div class="chart-body mid" id="ch-pie"></div>
+    </div>
+
+    <!-- 趋势 + TOP5偏差 -->
+    <div class="card" id="card-trend">
+      <div class="card-head">
+        <span class="card-title">一致率趋势</span>
+        <div class="card-ctrl"><span class="hint" id="trend-desc"></span></div>
+      </div>
+      <div class="chart-body mid" id="ch-trend"></div>
+    </div>
+
+    <div class="card" id="card-top5">
+      <div class="card-head">
+        <span class="card-title">TOP5 偏差城市 <span class="card-sub">点击柱子进入详情</span></span>
+        <div class="card-ctrl">
+          <select id="top5-module" onchange="Charts.switchTop5Module(this.value)"></select>
+          <select id="top5-field" onchange="Charts.switchTop5Field(this.value)"></select>
+        </div>
+      </div>
+      <div class="chart-body mid" id="ch-top5"></div>
+    </div>
+
+    <!-- 字段一致率（span2 + 侧栏 + 排序 + 解读） -->
+    <div class="card span2" id="card-fieldBar">
+      <div class="card-head">
+        <span class="card-title">字段一致率 <span class="card-sub">按一致率排序</span></span>
+        <div class="card-ctrl">
+          <button class="ctl-btn" id="fb-sort" onclick="Charts.toggleFieldSort()">升降序切换</button>
+        </div>
+      </div>
+      <div class="split-layout">
+        <div class="chart-body tall" id="ch-fieldBar"></div>
+        <div class="side-list" id="fb-module-list"></div>
+      </div>
+      <div class="card-note" id="fieldBar-note"></div>
+    </div>
+
+    <!-- 24小时时效小多图 -->
+    <div class="card span2" id="card-trend24">
+      <div class="card-head">
+        <span class="card-title">24小时时效准确率 <span class="card-sub">每字段一小图 · 短/中/长</span></span>
+      </div>
+      <div class="trend24-grid" id="trend24-grid"></div>
+    </div>
+
+    <!-- 城市一致率排行（span2 + 滑块 + 侧栏） -->
+    <div class="card span2" id="card-cityRate">
+      <div class="card-head">
+        <span class="card-title">城市一致率排行 <span class="card-sub">按一致率排序</span></span>
+        <div class="card-ctrl" id="city-view-ctrl">
+          <button class="ctl-btn" onclick="Charts.setCityView(5,this)">5</button>
+          <button class="ctl-btn" onclick="Charts.setCityView(10,this)">10</button>
+          <button class="ctl-btn" onclick="Charts.setCityView(15,this)">15</button>
+          <button class="ctl-btn active" onclick="Charts.setCityView(20,this)">20</button>
+          <button class="ctl-btn" onclick="Charts.setCityView(0,this)">全部</button>
+        </div>
+      </div>
+      <div class="split-layout">
+        <div class="chart-body tall" id="ch-cityRate"></div>
+        <div class="side-list" id="city-rank-list"></div>
+      </div>
+    </div>
+
+    <!-- 天气现象误判（span2 + 解读 + 表格） -->
+    <div class="card span2" id="card-weather">
+      <div class="card-head">
+        <span class="card-title">天气现象误判 <span class="card-sub">仅不一致配对 TOP15</span></span>
+      </div>
+      <div class="chart-body tall" id="ch-weather"></div>
+      <div class="card-note" id="weather-note"></div>
+      <div class="sankey-tbl-wrap" id="weather-table"></div>
+    </div>
+  </div>
+
+  <!-- 表格区 -->
+  <section class="tables-zone">
+    <div class="tabs">
+      <button class="tab active" data-tab="summary" onclick="Tables.switchTab('summary')">结论汇总</button>
+      <button class="tab" data-tab="detail" onclick="Tables.switchTab('detail')">模块详情</button>
+      <button class="tab" data-tab="top5" onclick="Tables.switchTab('top5')">TOP5 偏差城市</button>
+      <button class="tab" data-tab="weather" onclick="Tables.switchTab('weather')">天气TOP对</button>
+      <button class="tab" data-tab="rules" onclick="Tables.switchTab('rules')">规则与口径</button>
+      <button class="tab" data-tab="rows" onclick="Tables.switchTab('rows')">数据明细</button>
+    </div>
+    <div class="tab-body" id="tab-summary"></div>
+    <div class="tab-body hidden" id="tab-detail"></div>
+    <div class="tab-body hidden" id="tab-top5"></div>
+    <div class="tab-body hidden" id="tab-weather"></div>
+    <div class="tab-body hidden" id="tab-rules"></div>
+    <div class="tab-body hidden" id="tab-rows"></div>
+  </section>
+</main>
+
+<!-- ===== 报告区 ===== -->
+<section class="report-zone hidden" id="report-zone">
+  <div class="report-head">
+    <span class="card-title">Markdown 报告</span>
+    <span class="hint" id="report-meta"></span>
+    <div class="card-ctrl">
+      <a class="btn-ghost" id="report-dl-md" href="#" target="_blank">下载 .md</a>
+      <a class="btn-ghost" id="report-dl-xlsx" href="#" target="_blank">下载 .xlsx</a>
+      <button class="btn-ghost" onclick="App.closeReport()">关闭</button>
+    </div>
+  </div>
+  <div class="report-body">
+    <div class="report-preview" id="report-preview"></div>
+  </div>
+</section>
+
+<!-- ===== 城市详情 Drawer ===== -->
+<div class="drawer-mask hidden" id="drawer-mask" onclick="Drawer.close()"></div>
+<aside class="drawer hidden" id="drawer">
+  <div class="drawer-head">
+    <span class="drawer-title" id="drawer-city"></span>
+    <button class="ctl-btn" onclick="Drawer.close()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+</aside>
+
+<script src="/static/assets/echarts.min.js"></script>
+<script src="/static/js/app.js"></script>
+<script src="/static/js/filters.js"></script>
+<script src="/static/js/charts.js"></script>
+<script src="/static/js/tables.js"></script>
+<script src="/static/js/drawer.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+.DS_Store
+__pycache__/
+*.pyc
+比对结果/
+原始拉取/
+一致性比对报告_*.md
+*.xlsx
+*.csv
+!data/*城市*.csv
+原始JSON_*/
+一致性比对报告docx生成器_方案.md
+data/样式参考.pdf
+国内天气现象接口.pdf
+utils/echarts.min.js
+.claude/
+原始拉取_json/
+raw_pull.log
